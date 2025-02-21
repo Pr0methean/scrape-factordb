@@ -7,11 +7,11 @@ while [ $job -ge 16718400 ]; do
   job=$(openssl rand 3 | od -DAn)
 done
 while [ ! -f "${fifo_id}" ]; do
-  let "digits = 93 - ((job * 5) % 11)" # Range of 83-93 digits
+  let "digits = 93 - (($job * 5) % 11)" # Range of 83-93 digits
   if [ 13 -eq $(( (job % 43) % 23 )) ]; then
     let "start = 100000"
   else
-    let "start = ((job * 91) % 200) * 500"
+    let "start = (($job * 91) % 200) * 500"
   fi
   echo "digits=${digits} start=${start} perpage=1 id=${job} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
   let "job++"
