@@ -16,7 +16,7 @@ while [ ! -f "${fifo_id}" ]; do
     let "start = 0" # Process numbers 0-4999
     let "perpage = 3"
   fi
-  echo "digits=$digits start=${start} perpage=${perpage} id=$job nice=0 ./scrape-composites.sh" >> "${fifo_id}"
+  echo "digits=${digits} start=${start} perpage=${perpage} id=${job} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
   let "job++"
 done &
 tail -f "${fifo_id}" | parallel -j '/tmp/scrape-composites-small-threads' --ungroup

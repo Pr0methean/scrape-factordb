@@ -13,7 +13,7 @@ while [ ! -f "${fifo_id}" ]; do
   else
     let "start = ((job * 91) % 200) * 500"
   fi
-  echo "digits=$digits start=${start} perpage=1 id=$job nice=0 ./scrape-composites.sh" >> "${fifo_id}"
+  echo "digits=${digits} start=${start} perpage=1 id=${job} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
   let "job++"
 done &
 tail -f "${fifo_id}" | parallel -j '/tmp/scrape-composites-large-threads' --ungroup
