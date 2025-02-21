@@ -7,7 +7,7 @@ while [ $job -ge 16718400 ]; do
   job=$(openssl rand 3 | od -DAn)
 done
 while [ ! -f "${fifo_id}" ]; do
-  let "digits = 91 - ((job * 7) % 9)" # Range of 83-91 digits
+  let "digits = 93 - ((job * 5) % 11)" # Range of 83-93 digits
   if [ 13 -eq $(( (job % 43) % 23 )) ]; then
     let "start = 100000"
   else
