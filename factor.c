@@ -24,7 +24,7 @@ tryfactor(char *input)
 */
   if (strlen(input) >= 78) {
     // Find just one factor
-    GEN factor_iter = ifac_start(x, 0);
+    GEN factor_iter = ifac_start(x, 1);
     long e;
     ifac_next(&factor_iter, &p2, &e);
   } else {
