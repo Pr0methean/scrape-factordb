@@ -32,9 +32,9 @@ set -u
         fi
         remaining=$perpage
 	for num in $(shuf -n ${perpage} <<< $results); do
-          echo "${id}: Factoring ${num}"
-          out=$(factor "${num}")
-          echo "${id}: ${out}"
+          echo "${id}: $(date -Ins): Factoring ${num}"
+          out=$(./factor "${num}")
+          echo "${id}: $(date -Ins): ${out}"
           factors=$(grep -o '[0-9]\+' <<< "${out}")
           if [ "${factors}" != "" ]; then
             echo "${id}: Reporting factors of ${num}"
