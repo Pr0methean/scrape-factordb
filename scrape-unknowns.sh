@@ -28,15 +28,15 @@ while read -r assign_url; do
     grep -q '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\)' <<< $result
     if [ $? -eq 0 ]; then
         # Increased penalties for conflicting work that has already *finished*
-        let "start += 2**redundant + 1"
-        let "perpage -= 2**redundant + 1"
+        let "start += 10"
+        let "perpage -= 10"
         let "redundant++"
         # sleep 0.5
     else
         grep -q 'already in queue' <<< $result
         if [ $? -eq 0 ]; then
-            let "start += 2**redundant"
-            let "perpage -= 2**redudant"
+            let "start += 5"
+            let "perpage -= 5"
             let "redundant++"
             # sleep 2
         fi
