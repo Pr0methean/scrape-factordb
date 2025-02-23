@@ -18,6 +18,7 @@ assign_urls=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --
   | sed 's_.*index.php_https://factordb.com/index.php_' \
   | sed 's_$_\&prp=Assign+to+worker_')
 let "remaining = $perpage"
+let "max_redundant = ($perpage + 2)/5"
 let "redundant = 0"
 declare assign_url
 while read -r assign_url; do
@@ -27,33 +28,21 @@ while read -r assign_url; do
     grep -q '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\)' <<< $result
     if [ $? -eq 0 ]; then
         # Increased penalties for conflicting work that has already *finished*
-        let "start += 2"
-        let "perpage -= 2"
+        let "start += 2**redundant + 1"
+        let "perpage -= 2**redundant + 1"
         let "redundant++"
         # sleep 0.5
     else
         grep -q 'already in queue' <<< $result
         if [ $? -eq 0 ]; then
-            let "start++"
-            let "perpage--"
+            let "start += 2**redundant"
+            let "perpage -= 2**redudant"
             let "redundant++"
             # sleep 2
         fi
     fi
-    if [ $redundant -ge 3 ]; then
-        # Results are or will be out of date; wait and then run a new search
-        let "start += $perpage"
-        let "perpage -= $remaining"
-        if [ $perpage -lt 10 ]; then
-            let "perpage = 10"
-        fi
-        # if [ $remaining -gt $perpage ]; then
-        #     let "remaining = $perpage"
-        # fi
-        # let "start += $remaining"
-        if [ $start -gt $((100000 + $perpage)) ]; then
-            let "start = 100000 + $perpage"
-        fi
+    if [ $redundant -ge $max_redundant ]; then
+        # Results are or will be out of date; run a new search
         break
     fi
     grep -q 'Assigned' <<< $result
@@ -79,6 +68,13 @@ fi
 if [ $perpage -gt 5000 ]; then
     let "perpage = 5000"
 fi
+if [ $perpage -lt 10 ]; then
+    let "perpage = 10"
+fi
+if [ $start -gt 100000 ]; then
+    let "start = 100000"
+fi
+
  #
  #    | xargs wget -e robots=off -nv -w "$delay" -O /tmp/lastscrape || true
 done
