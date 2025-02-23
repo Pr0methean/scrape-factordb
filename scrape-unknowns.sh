@@ -27,8 +27,8 @@ while read -r assign_url; do
     grep -q '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\)' <<< $result
     if [ $? -eq 0 ]; then
         # Increased penalties for conflicting work that has already *finished*
-        let "start++"
-        let "perpage--"
+        let "start += 2"
+        let "perpage -= 2"
         let "redundant++"
         # sleep 0.5
     else
