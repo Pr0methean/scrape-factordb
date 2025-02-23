@@ -18,7 +18,7 @@ assign_urls=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --
   | sed 's_.*index.php_https://factordb.com/index.php_' \
   | sed 's_$_\&prp=Assign+to+worker_')
 let "remaining = $perpage"
-let "max_redundant = ($perpage + 2)/5"
+let "max_redundant = ($perpage + 5)/10"
 let "redundant = 0"
 declare assign_url
 while read -r assign_url; do
@@ -41,7 +41,7 @@ while read -r assign_url; do
             # sleep 2
         fi
     fi
-    if [ $redundant -ge $max_redundant ]; then
+    if [ $redundant -gt $max_redundant ]; then
         # Results are or will be out of date; run a new search
         break
     fi
