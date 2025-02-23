@@ -42,6 +42,7 @@ while read -r assign_url; do
     fi
     if [ $redundant -ge 3 ]; then
         # Results are or will be out of date; wait and then run a new search
+        let "start += $perpage"
         let "perpage -= $remaining"
         if [ $perpage -lt 10 ]; then
             let "perpage = 10"
@@ -50,7 +51,6 @@ while read -r assign_url; do
         #     let "remaining = $perpage"
         # fi
         # let "start += $remaining"
-        let "start += $perpage"
         if [ $start -gt $((100000 + $perpage)) ]; then
             let "start = 100000 + $perpage"
         fi
