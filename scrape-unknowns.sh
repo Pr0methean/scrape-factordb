@@ -14,7 +14,7 @@ echo $url
 assign_urls=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --no-check-certificate -nv -O- -o /dev/null "${url}" \
   | pup 'a[href*="index.php?id"] attr{href}' \
   | uniq \
-  | shuf \
+  | tac \
   | sed 's_.*index.php_https://factordb.com/index.php_' \
   | sed 's_$_\&prp=Assign+to+worker_')
 let "remaining = $perpage"
