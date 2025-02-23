@@ -33,8 +33,10 @@ set -u
         remaining=$perpage
 	for num in $(shuf -n ${perpage} <<< $results); do
           echo "${id}: $(date -Ins): Factoring ${num}"
+          start_time=$(date +%s%N)
           out=$(./factor "${num}")
-          echo "${id}: $(date -Ins): ${out}"
+          end_time=$(date +%s%N)
+          echo "${id}: $(date -Ins): Found factors ${out} of ${num} after $(($end_time - $start_time)) ns"
           factors=$(grep -o '[0-9]\+' <<< "${out}")
           if [ "${factors}" != "" ]; then
             echo "${id}: Reporting factors of ${num}"
