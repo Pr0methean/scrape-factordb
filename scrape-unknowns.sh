@@ -18,6 +18,7 @@ assign_urls=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --
   | sed 's_.*index.php_https://factordb.com/index.php_' \
   | sed 's_$_\&prp=Assign+to+worker_')
 let "remaining = $perpage"
+let "redundant = 0"
 declare assign_url
 while read -r assign_url; do
     result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_url}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
@@ -26,18 +27,20 @@ while read -r assign_url; do
     grep -q '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\)' <<< $result
     if [ $? -eq 0 ]; then
         # Increased penalties for conflicting work that has already *finished*
-        # let "start++"
-        # let "perpage -= 2"
-        let "should_fetch_anew = 1"
+        let "start++"
+        let "perpage--"
+        let "redundant++"
         # sleep 0.5
     else
         grep -q 'already in queue' <<< $result
         if [ $? -eq 0 ]; then
-            let "should_fetch_anew = 1"
+            let "start++"
+            let "perpage--"
+            let "redundant++"
             # sleep 2
         fi
     fi
-    if [ $should_fetch_anew -ne 0 ]; then
+    if [ $redundant -ge 3 ]; then
         # Results are or will be out of date; wait and then run a new search
         let "perpage -= $remaining"
         if [ $perpage -lt 10 ]; then
