@@ -27,9 +27,9 @@ while read -r assign_url; do
     let "should_fetch_anew = 0"
     grep -q '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\)' <<< $result
     if [ $? -eq 0 ]; then
-        # Increased start penalty for conflicting work that has already *finished*
+        # Increased penalties for conflicting work that has already *finished*
         let "start += 10"
-        let "perpage -= 5"
+        let "perpage -= 10"
         let "redundant++"
         # sleep 0.5
     else
