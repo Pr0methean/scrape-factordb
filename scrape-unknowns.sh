@@ -62,14 +62,15 @@ while read -r assign_url; do
     fi
     let "remaining--"
 done <<< "${assign_urls}"
-if [ $start -lt 0 ]; then
-    let "start = 0"
-fi
 if [ $perpage -gt 5000 ]; then
     let "perpage = 5000"
 fi
 if [ $perpage -lt 10 ]; then
+    let "start += 10 - $perpage"
     let "perpage = 10"
+fi
+if [ $start -lt 0 ]; then
+    let "start = 0"
 fi
 if [ $start -gt 100000 ]; then
     let "start = 100000"
