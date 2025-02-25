@@ -19,5 +19,5 @@ while true; do
   if [ "${u}" != "" ]; then
     echo "\"${time}\",${p},${prp},${cf},${c},${u}" | tee -a stats.csv
   fi
-  sleep 41
+  sleep 46
 done
