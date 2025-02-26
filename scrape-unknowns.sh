@@ -59,7 +59,7 @@ while read -r assign_url; do
     else
         grep -q 'Please wait' <<< $result
         if [ $? -eq 0 ]; then
-            let "start--"
+            let "start -= 5"
             # sleep 0.5
         fi
     fi
