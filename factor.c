@@ -22,7 +22,7 @@ tryfactor(char *input)
     l1 = 0;
   factors = factorint(x, l1);
 */
-  if (strlen(input) >= 78) {
+  if (strlen(input) >= 83) {
     // Find just one factor
     GEN factor_iter = ifac_start(x, 1);
     long e;
