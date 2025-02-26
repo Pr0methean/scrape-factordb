@@ -15,6 +15,6 @@ while : ; do
   url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=5000&start=${start}&download=1"
   sem --id 'factordb-curl' --fg -j 4 wget -e robots=off -nv --no-check-certificate -O- "$url"
   echo "Requested ${digits}-digit composites starting at ${start}."
-  sleep 298
+  sleep 178
   let "job++"
 done
