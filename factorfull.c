@@ -1,0 +1,30 @@
+/*-*- compile-command: "/usr/lib/llvm-20/bin/clang -o factorfull factorfull.c -O3 -flto -Wall -fno-strict-aliasing -O3 -march=native -fPIC -Wl,-rpath,/usr/local/lib -lc -lm -L/usr/local/lib -I\"/usr/local/include\" -lpari"; -*-*/
+#include <string.h>
+#include <pari/pari.h>
+/*
+GP;install("tryfactor","G","tryfactor","./factor.gp.so");
+*/
+void tryfactor(char *);
+/*End of prototype*/
+
+void
+tryfactor(char *input)
+{
+  // long l1 = 0;
+  GEN x = gp_read_str(input);
+  GEN p2 = gen_0;
+  if (typ(x) != t_INT)
+    pari_err_TYPE("tryfactor",x);
+  GEN factor_iter = ifac_start(x, 1);
+  long e;
+  while (ifac_next(&factor_iter, &p2, &e) != 0) {
+    pari_printf("%Ps\n", p2);
+  }
+}
+
+int main(int argc, char **argv) {
+  pari_init_opts(1000 * 1000 * 1000, 2, INIT_noIMTm | INIT_noINTGMPm | INIT_DFTm);
+  tryfactor(argv[1]);
+  // pari_close();
+}
+
