@@ -15,10 +15,17 @@ tryfactor(char *input)
   GEN p2 = gen_0;
   if (typ(x) != t_INT)
     pari_err_TYPE("tryfactor",x);
-  GEN factor_iter = ifac_start(x, 1);
-  long e;
+  GEN factor_iter = ifac_start(x, 0);
+  long e, e1;
+  GEN last_cofactor = gen_0;
   while (ifac_next(&factor_iter, &p2, &e) != 0) {
-    pari_printf("%Ps\n", p2);
+    if (!equalii(p2, last_cofactor)) {
+      pari_printf("%Ps\n", p2);
+    }
+    ifac_read(factor_iter, &last_cofactor, &e1);
+    if (e1 > 1) {
+      last_cofactor = gen_0;
+    }
   }
 }
 
