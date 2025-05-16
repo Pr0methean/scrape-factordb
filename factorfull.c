@@ -1,4 +1,5 @@
 /*-*- compile-command: "/usr/lib/llvm-20/bin/clang -o factorfull factorfull.c -O3 -flto -Wall -fno-strict-aliasing -O3 -march=native -fPIC -Wl,-rpath,/usr/local/lib -lc -lm -L/usr/local/lib -I\"/usr/local/include\" -lpari"; -*-*/
+#include <stdio.h>
 #include <string.h>
 #include <pari/pari.h>
 /*
@@ -21,6 +22,7 @@ tryfactor(char *input)
   while (ifac_next(&factor_iter, &p2, &e) != 0) {
     if (!equalii(p2, last_cofactor)) {
       pari_printf("%Ps\n", p2);
+      fflush(stdout);
     }
     ifac_read(factor_iter, &last_cofactor, &e1);
     if (e1 > 1) {
