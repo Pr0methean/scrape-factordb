@@ -1,14 +1,13 @@
 #!/bin/bash
 set -u
 origstart=$start
+let "min_perpage = 1"
+let "max_perpage = 1"
 let "start = $origstart"
 let "perpage = $perpage"
 # let "half_perpage = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
-if [ $origstart -eq -1 ]; then
-  let "start = $RANDOM"
-fi
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
 echo $url
 assign_urls=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --no-check-certificate -nv -O- -o /dev/null "${url}" \
@@ -34,14 +33,14 @@ while read -r assign_url; do
         let "start += 5"
         let "perpage -= 10"
         let "redundant++"
-        # sleep 0.5
+        sleep 1
     else
         grep -q 'already in queue' <<< $result
         if [ $? -eq 0 ]; then
             let "start += 5"
             let "perpage -= 5"
             let "redundant++"
-            # sleep 2
+            sleep 0.5
         fi
     fi
     if [ $redundant -gt $max_redundant ]; then
@@ -56,21 +55,22 @@ while read -r assign_url; do
   #      else
   #        let "half_perpage=1"
   #      fi
+        sleep 0.5
     else
         grep -q 'Please wait' <<< $result
         if [ $? -eq 0 ]; then
             let "start -= 5"
-            # sleep 0.5
+            sleep 1.5
         fi
     fi
     let "remaining--"
 done <<< "${assign_urls}"
-if [ $perpage -gt 5000 ]; then
-    let "perpage = 5000"
+if [ $perpage -gt ${max_perpage} ]; then
+    let "perpage = $max_perpage"
 fi
-if [ $perpage -lt 10 ]; then
-    let "start += 10 - $perpage"
-    let "perpage = 10"
+if [ $perpage -lt ${min_perpage} ]; then
+    let "start += $min_perpage - $perpage"
+    let "perpage = $min_perpage"
 fi
 if [ $start -lt 0 ]; then
     let "start = 0"
