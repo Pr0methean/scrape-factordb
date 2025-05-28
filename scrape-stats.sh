@@ -21,7 +21,7 @@ while true; do
       echo "\"${time}\",${p},${prp},${cf},${c},${u}" | tee -a stats.csv
     fi
     least_u_row=$(get_row "${results}" 6 4)
-    echo ${least_u_row}
+    # echo ${least_u_row}
     assign_least_u=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
       | sed 's_.*index.php_https://factordb.com/index.php_' \
       | sed 's_$_\&prp=Assign+to+worker_')
