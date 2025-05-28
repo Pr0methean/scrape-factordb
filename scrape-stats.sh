@@ -20,13 +20,16 @@ while true; do
     if [ "${u}" != "" ]; then
       echo "\"${time}\",${p},${prp},${cf},${c},${u}" | tee -a stats.csv
     fi
-    assign_least_u=$(get_row "${results}" 6 4 | grep -o 'index.php?id=[0-9]+' \
+    least_u_row=$(get_row "${results}" 6 4)
+    echo ${least_u_row}
+    assign_least_u=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
       | sed 's_.*index.php_https://factordb.com/index.php_' \
       | sed 's_$_\&prp=Assign+to+worker_')
+    echo ${assign_least_u}
     result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_least_u}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
     echo $result
   ) &
   next_row_proc=$!
-  sleep 119.5
+  sleep 59.5
   wait $next_row_proc
 done
