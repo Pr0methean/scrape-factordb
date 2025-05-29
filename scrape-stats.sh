@@ -8,6 +8,8 @@ get_row () {
     | tr -d ','
 }
 
+mkdir -p "/tmp/factordb-scraped-unknowns"
+
 while true; do
   (
     results=$(sem --id 'factordb-curl' -j 4 wget -e robots=off -nv --no-check-certificate -O- -o /dev/null 'https://factordb.com/status.php')
@@ -21,13 +23,17 @@ while true; do
       echo "\"${time}\",${p},${prp},${cf},${c},${u}" | tee -a stats.csv
       least_u_row=$(get_row "${results}" 6 4)
       if [ "${least_u_row}" != "" ]; then
-        # echo ${least_u_row}
-        assign_least_u=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
-          | sed 's_.*index.php_https://factordb.com/index.php_' \
-          | sed 's_$_\&prp=Assign+to+worker_')
-        echo ${assign_least_u}
-        result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_least_u}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
-        echo $result
+        least_u_id=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
+          | grep -o '[0-9]\+')
+        if [ ! -f "/tmp/factordb-scraped-unknowns/${least_u_id}" ]; then
+          assign_least_u="https://factordb.com/index.php?id=${least_u_id}&prp=Assign+to+worker"
+          echo ${assign_least_u}
+          result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_least_u}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
+          if [ "${result}" != "" ]; then
+            touch "/tmp/factordb-scraped-unknowns/${least_u_id}"
+            echo $result
+          fi
+        fi
       fi
     fi
   ) &
