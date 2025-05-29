@@ -36,10 +36,9 @@ mkdir -p "/tmp/factordb-composites"
           if [ $remaining -le 0 ]; then
             break
           fi
-          if [ -f "/tmp/factordb-composites/${num}" ]; then
+          if [ ! flock -n "/tmp/factordb-composites/${num}" ]; then
             continue
           fi
-          touch "/tmp/factordb-composites/${num}"
           let "remaining -= 1"
           echo "${id}: $(date -Is): Factoring ${num}"
           start_time=$(date +%s%N)
