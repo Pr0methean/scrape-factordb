@@ -1,5 +1,6 @@
 #!/bin/bash
 set -u
+mkdir -p "/tmp/factordb-composites"
 #	if [ ${origstart} == -1 ]; then
 #		start="$(($RANDOM * 3))"
 #	fi
@@ -35,6 +36,10 @@ set -u
           if [ $remaining -le 0 ]; then
             break
           fi
+          if [ -f "/tmp/factordb-composites/${num}" ]; then
+            continue
+          fi
+          touch "/tmp/factordb-composites/${num}"
           let "remaining -= 1"
           echo "${id}: $(date -Is): Factoring ${num}"
           start_time=$(date +%s%N)
