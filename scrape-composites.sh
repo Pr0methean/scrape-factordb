@@ -32,17 +32,21 @@ set -u
         fi
         remaining=$perpage
 	for num in $(shuf -n ${perpage} <<< $results); do
+          let "remaining -= 1"
           echo "${id}: $(date -Is): Factoring ${num}"
           start_time=$(date +%s%N)
-          while read -r out; do
-            echo "${id}: $(date -Is): Found factor ${out} of ${num}"
-            curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${out}" \
+          declare factor
+          while read -r factor; do
+            echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
+            curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}" \
                     | grep -q "Already"
             if [ $? -eq 0 ]; then
-              echo "${id}: Factor ${out} of ${num} already known! Aborting batch."
+              echo "${id}: Factor ${factor} of ${num} already known! Aborting batch."
               let "remaining = 0"
+            else
+              echo "${id}: Factor ${factor} of ${num} accepted."
             fi
-          done < $(./factor "${num}" | grep -o '[0-9]\+')
+          done < <(./factor "${num}" | grep -o '[0-9]\+')
           end_time=$(date +%s%N)
           echo "${id}: $(date -Is): Done factoring ${num} after $(($end_time - $start_time)) ns"
           echo "${id}: ${remaining} composites left in this batch."
