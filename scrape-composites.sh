@@ -32,6 +32,9 @@ set -u
         fi
         remaining=$perpage
 	for num in $(shuf -n ${perpage} <<< $results); do
+          if [ $remaining -le 0 ]; then
+            break
+          fi
           let "remaining -= 1"
           echo "${id}: $(date -Is): Factoring ${num}"
           start_time=$(date +%s%N)
