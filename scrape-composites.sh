@@ -36,26 +36,26 @@ mkdir -p "/tmp/factordb-composites"
           if [ $remaining -le 0 ]; then
             break
           fi
-          if [ ! flock -n "/tmp/factordb-composites/${num}" ]; then
-            continue
+          exec 9>/tmp/factordb-composites/${num}
+          if flock -xn 9; then
+              echo "${id}: $(date -Is): Factoring ${num}"
+              start_time=$(date +%s%N)
+              declare factor
+              while read -r factor; do
+                echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
+                curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}" \
+                      | grep -q "Already"
+                if [ $? -eq 0 ]; then
+                  echo "${id}: Factor ${factor} of ${num} already known! Aborting batch."
+                  let "remaining = 0"
+                else
+                  echo "${id}: Factor ${factor} of ${num} accepted."
+                fi
+              done < <(./factor "${num}" | grep -o '[0-9]\+')
+              end_time=$(date +%s%N)
+              echo "${id}: $(date -Is): Done factoring ${num} after $(($end_time - $start_time)) ns"
+              echo "${id}: ${remaining} composites left in this batch."
           fi
           let "remaining -= 1"
-          echo "${id}: $(date -Is): Factoring ${num}"
-          start_time=$(date +%s%N)
-          declare factor
-          while read -r factor; do
-            echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
-            curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}" \
-                    | grep -q "Already"
-            if [ $? -eq 0 ]; then
-              echo "${id}: Factor ${factor} of ${num} already known! Aborting batch."
-              let "remaining = 0"
-            else
-              echo "${id}: Factor ${factor} of ${num} accepted."
-            fi
-          done < <(./factor "${num}" | grep -o '[0-9]\+')
-          end_time=$(date +%s%N)
-          echo "${id}: $(date -Is): Done factoring ${num} after $(($end_time - $start_time)) ns"
-          echo "${id}: ${remaining} composites left in this batch."
 	done
 echo "${id}: Finished batch"
