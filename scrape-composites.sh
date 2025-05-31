@@ -53,7 +53,7 @@ mkdir -p "/tmp/factordb-composites"
                 fi
               done < <(./factor "${num}" | grep -o '[0-9]\+')
               end_time=$(date +%s%N)
-              echo "${id}: $(date -Is): Done factoring ${num} after $(($end_time - $start_time)) ns"
+              echo "${id}: $(date -Is): Done factoring ${num} after $(./format-nanos.sh $(($end_time - $start_time)))"
               echo "${id}: ${remaining} composites left in this batch."
           fi
           let "remaining -= 1"
