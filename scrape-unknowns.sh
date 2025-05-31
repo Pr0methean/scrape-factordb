@@ -2,7 +2,9 @@
 set -u
 origstart=$start
 let "min_perpage = 1"
-let "max_perpage = 1"
+let "max_perpage = 20"
+let "min_start = 1" # Skip the 0th since ./scrape-stats.sh will handle it
+let "max_start = 100000" # Largest start that factordb allows
 let "start = $origstart"
 let "perpage = $perpage"
 # let "half_perpage = 0"
@@ -72,11 +74,11 @@ if [ $perpage -lt ${min_perpage} ]; then
     let "start += $min_perpage - $perpage"
     let "perpage = $min_perpage"
 fi
-if [ $start -lt 0 ]; then
-    let "start = 0"
+if [ $start -lt ${min_start} ]; then
+    let "start = $min_start"
 fi
-if [ $start -gt 100000 ]; then
-    let "start = 100000"
+if [ $start -gt ${max_start} ]; then
+    let "start = $max_start"
 fi
 
  #
