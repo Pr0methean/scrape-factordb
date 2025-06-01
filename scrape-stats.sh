@@ -8,6 +8,22 @@ get_row () {
     | tr -d ','
 }
 
+try_assign_prp () {
+  if [ ! -f "/tmp/factordb-scraped-unknowns/$1" ]; then
+    assign_least_u="https://factordb.com/index.php?id=$1&prp=Assign+to+worker"
+    echo $1
+    result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_least_u}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
+    grep -q '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\)' <<< $result
+    if [ "${result}" != "" ]; then
+      touch "/tmp/factordb-scraped-unknowns/$1"
+      echo "$1: $result"
+      return 0
+    else
+      return 1
+    fi
+  fi
+}
+
 mkdir -p "/tmp/factordb-scraped-unknowns"
 
 while true; do
@@ -25,14 +41,16 @@ while true; do
       if [ "${least_u_row}" != "" ]; then
         least_u_id=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
           | grep -o '[0-9]\+')
-        if [ ! -f "/tmp/factordb-scraped-unknowns/${least_u_id}" ]; then
-          assign_least_u="https://factordb.com/index.php?id=${least_u_id}&prp=Assign+to+worker"
-          echo ${assign_least_u}
-          result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_least_u}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
-          if [ "${result}" != "" ]; then
-            touch "/tmp/factordb-scraped-unknowns/${least_u_id}"
-            echo $result
-          fi
+        if [ ! "$(try_assign_prp ${least_u_id} )" ]; then
+          echo "Smallest-unknown id ${least_u_id} is already scraped"
+          assign_ids=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --no-check-certificate -nv -O- -o /dev/null "https://factordb.com/listtype.php?t=2\&mindig=3000\&start=1\&perpage=3" \
+            | pup 'a[href*="index.php?id"] attr{href}' \
+            | uniq \
+            | tac \
+            | sed 's_.*id=__')
+          while read -r assign_id; do
+            try_assign_prp ${assign_id}
+          done <<< "${assign_ids}"
         fi
       fi
     fi
