@@ -12,15 +12,14 @@ try_assign_prp () {
   if [ ! -f "/tmp/factordb-scraped-unknowns/$1" ]; then
     assign_least_u="https://factordb.com/index.php?id=$1&prp=Assign+to+worker"
     echo $1
-    result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_least_u}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
-    grep -q '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\)' <<< $result
+    result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_least_u}" | grep '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\)')
     if [ "${result}" != "" ]; then
       touch "/tmp/factordb-scraped-unknowns/$1"
-      echo "$1: $result"
       return 0
     else
       return 1
     fi
+    echo "$1: $result"
   fi
 }
 
