@@ -1,9 +1,10 @@
 #!/bin/bash
 set -u
 origstart=$start
-let "min_perpage = 1"
+let "min_perpage = 3"
 let "max_perpage = 20"
-let "min_start = 1" # Skip the 0th since ./scrape-stats.sh will handle it
+let "goal_perpage = 3"
+let "min_start = 0"
 let "max_start = 100000" # Largest start that factordb allows
 let "start = $origstart"
 let "perpage = $perpage"
@@ -19,9 +20,9 @@ assign_urls=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --
   | sed 's_.*index.php_https://factordb.com/index.php_' \
   | sed 's_$_\&prp=Assign+to+worker_')
 let "remaining = $perpage"
-let "max_redundant = ($perpage + 5)/10"
-if [ $max_redundant -gt 15 ]; then
-  let "max_redundant = 15"
+let "max_redundant = $goal_perpage"
+if [ $max_redundant -lt 2 ]; then
+  let "max_redundant = 2"
 fi
 let "redundant = 0"
 declare assign_url
@@ -32,15 +33,15 @@ while read -r assign_url; do
     grep -q '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\)' <<< $result
     if [ $? -eq 0 ]; then
         # Increased penalties for conflicting work that has already *finished*
-        let "start += 5"
-        let "perpage -= 10"
+        let "start += 1"
+        let "perpage -= 2"
         let "redundant++"
         sleep 1
     else
         grep -q 'already in queue' <<< $result
         if [ $? -eq 0 ]; then
-            let "start += 5"
-            let "perpage -= 5"
+            let "start += 1"
+            let "perpage -= 1"
             let "redundant++"
             sleep 0.5
         fi
@@ -51,17 +52,18 @@ while read -r assign_url; do
     fi
     grep -q 'Assigned' <<< $result
     if [ $? -eq 0 ]; then
-  #      if [ $half_perpage -gt 0 ]; then
-          let "perpage++"
-  #        let "half_perpage=0"
-  #      else
-  #        let "half_perpage=1"
-  #      fi
+        if [ $perpage -lt $goal_perpage ]; then
+          let "perpage += 1"
+        elif [ $start -le $min_start ]; then
+          let "perpage += 1"
+        else
+          let "start -= 1"
+        fi
         sleep 0.5
     else
         grep -q 'Please wait' <<< $result
         if [ $? -eq 0 ]; then
-            let "start -= 5"
+            let "start -= $goal_perpage"
             sleep 1.5
         fi
     fi
