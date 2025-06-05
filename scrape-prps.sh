@@ -7,14 +7,17 @@ if [ ${start} == -1 ]; then
 fi
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
-results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- <<< "$url")
-let "bases_left_on_page = 0"
+results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- <<< "$url")
+let "bases_left_on_page = -1" # Don't increase start if search fails
 for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
   | uniq \
   | sed 's_.*index.php_https://factordb.com/index.php_' \
 ); do
+  if [ ${bases_left_on_page} -eq -1 ]; then
+    let "bases_left_on_page = 0"
+  fi
   echo "Checking ID ${id}"
-  status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off -t 10 -nv <<< "${id}\&open=prime\&ct=Proof")
+  status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- <<< "${id}\&open=prime\&ct=Proof")
   bases_checked_html=$(grep -A1 'Bases checked' <<< "$status")
   echo "$bases_checked_html"
   bases_checked_lines=$(grep -o '[0-9]\+' <<< "$bases_checked_html")
