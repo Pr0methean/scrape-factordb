@@ -8,6 +8,7 @@ fi
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
 results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- <<< "$url")
+let "bases_left_on_page = 0"
 for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
   | uniq \
   | sed 's_.*index.php_https://factordb.com/index.php_' \
@@ -21,6 +22,7 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
   bases=({2..255})
   declare -a bases_left
   readarray -t bases_left < <(echo "${bases[@]} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
+  let "bases_left_on_page += ${#bases_left[@]}"
   urls=()
   for base in "${bases_left[@]}"; do
     urls+=("${id}\&open=prime\&basetocheck=${base}")
@@ -40,6 +42,8 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
     fi
    done
 done
-start=$((($start + $perpage) % (100000 + $perpage)))
+if [ ${bases_left_on_page} -eq 0 ]; then
+  start=$((($start + $perpage) % (100000 + $perpage)))
+fi
 done
 
