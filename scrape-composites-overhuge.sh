@@ -3,7 +3,7 @@ set -u
 job=1050000
 
 # Start at a random point in the cycle, and avoid modulo bias
-while [ $job -ge 65205 ]; do
+while [ $job -ge 65163 ]; do
 #   myrandom=$(openssl rand 3 | od -DAn)
 #   job=$(($myrandom / 160))
   job=$(openssl rand 2 | od -DAn)
@@ -11,8 +11,8 @@ done
 
 while : ; do
   let "start = ((job * 8) % 21) * 5000" # start must be in range 0 to 100,000
-  let "digits = ((job * 11) % 23) + 96" # 96-127 digits; too big to factor ourselves
-  if [ $digits -eq 128 ]; then
+  let "digits = ((job * 13) % 29) + 96" # 96-123 digits; too big to factor ourselves
+  if [ $digits -eq 124 ]; then
     let "start = 0"
     let "digits = 1"
   fi
