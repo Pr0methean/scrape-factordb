@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 let "min_start = 0"
-let "max_start = 50"
+let "max_start = 51"
 let "start = $min_start"
 let "perpage = 3"
 let "waits = 0"
