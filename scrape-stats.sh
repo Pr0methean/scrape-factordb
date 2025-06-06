@@ -26,8 +26,9 @@ while true; do
     # echo "Smallest PRP size is ${smallest_prp}"
     smallest_c_cell=$(get_row "${results}" 6 3)
     smallest_c=$(sed 's_digits.*__' <<< "${smallest_c_cell}")
+    load=$(get_row "${results}" 20 2)
     if [ "${u}" != "" ]; then
-      echo "\"${time}\",${p},${prp},${cf},${c},${u},${smallest_prp},${smallest_c}" | tee -a stats.csv
+      echo "\"${time}\",${p},${prp},${cf},${c},${u},${smallest_prp},${smallest_c},${load}" | tee -a stats.csv
     fi
   ) &
   next_row_proc=$!
