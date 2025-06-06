@@ -7,6 +7,7 @@ if [ ${start} == -1 ]; then
 fi
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
+echo "Running search: ${url}"
 results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- <<< "$url")
 let "bases_left_on_page = -1" # Don't increase start if search fails
 for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
