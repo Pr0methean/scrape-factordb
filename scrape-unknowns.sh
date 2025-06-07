@@ -6,7 +6,7 @@ let "start = $min_start"
 let "perpage = 3"
 let "waits = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
-delays=(2 3 4 5.5 8 11 16)
+delays=(4 5.5 8 11 16)
 let "max_waits = ${#delays[@]} - 1"
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
