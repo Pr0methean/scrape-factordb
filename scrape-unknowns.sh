@@ -6,7 +6,7 @@ let "start = $min_start"
 let "perpage = 3"
 let "waits = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
-delays=(4 5.5 8 11 16)
+delays=(2 3 4 5.5 8 11 16)
 let "max_waits = ${#delays[@]} - 1"
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
@@ -23,7 +23,9 @@ while read -r assign_url; do
     echo $result
     grep -q 'Assigned' <<< $result
     if [ $? -eq 0 ]; then
-      let "waits = 0"
+      if [ $waits -gt 0 ]; then
+        let "waits -= 1"
+      fi
     elif [ $waits -lt $max_waits ]; then
         grep -q 'Please wait' <<< $result
         if [ $? -eq 0 ]; then
