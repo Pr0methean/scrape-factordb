@@ -26,13 +26,16 @@ while read -r assign_url; do
       if [ $waits -gt 0 ]; then
         let "waits -= 1"
       fi
-    elif [ $waits -lt $max_waits ]; then
-        grep -q 'Please wait' <<< $result
-        if [ $? -eq 0 ]; then
-            let "waits += 1"
+      sleep ${delays[$waits]}
+    else
+      grep -q 'Please wait' <<< $result
+      if [ $? -eq 0 ]; then
+        if [ $waits -lt $max_waits ]; then
+          let "waits += 1"
         fi
+        sleep ${delays[$waits]}
+      fi
     fi
-    sleep ${delays[$waits]}
 done <<< "${assign_urls}"
 let "start = ($start + $perpage) % ${max_start}"
 done
