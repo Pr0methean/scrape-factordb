@@ -3,12 +3,12 @@ set -u
 fifo_id="/tmp/$(uuidgen)"
 mkfifo "${fifo_id}"
 let "job = 99999999"
-while [ $job -ge "16767000" ]; do
-  let "job = $(openssl rand 3 | od -DAn)"
+while [ $job -ge "64722" ]; do # Select random point in the 7*23*201 cycle
+  let "job = $(openssl rand 2 | od -DAn)"
 done
 let "id = 1"
 while [ ! -f "${fifo_id}" ]; do
-  let "digits = 96 - (($job * 5) % 8)" # Range of 89-96 digits
+  let "digits = 95 - (($job * 5) % 7)" # Range of 89-95 digits
   let "perpage = 1"
   if [ 13 -eq $(( (job % 43) % 23 )) ]; then
     let "start = 100000"
