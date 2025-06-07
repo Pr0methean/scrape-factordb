@@ -17,7 +17,7 @@ while : ; do
     let "digits = 1"
   fi
   url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=5000&start=${start}"
-  sem --id 'factordb-curl' --fg -j 4 wget --user-agent "\"Mozilla/5.0 (X11; Linux x86_64; rv:139.0) Gecko/20100101 Firefox/139.0\"" --retry 10 --retry-all-errors --retry-delay 10 -e robots=off -nv --no-check-certificate -O- "$url"
+  sem --id 'factordb-curl' --fg -j 4 wget --user-agent "\"Mozilla/5.0 (X11; Linux x86_64; rv:139.0) Gecko/20100101 Firefox/139.0\"" --retry 10 --retry-all-errors --retry-delay 10 -e robots=off --no-check-certificate -O- "$url"
   echo "$(date -Is): Requested ${digits}-digit composites starting at ${start}."
   sleep 178
   let "job++"
