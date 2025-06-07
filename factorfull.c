@@ -1,4 +1,4 @@
-/*-*- compile-command: "/usr/lib/llvm-20/bin/clang -o factorfull factorfull.c -O3 -flto -Wall -fno-strict-aliasing -O3 -march=native -fPIC -Wl,-rpath,/usr/local/lib -lc -lm -L/usr/local/lib -I\"/usr/local/include\" -lpari"; -*-*/
+/*-*- compile-command: "/usr/lib/llvm-20/bin/clang -o ff factorfull.c -O3 -flto -Wall -fno-strict-aliasing -O3 -march=native -fPIC -Wl,-rpath,/usr/local/lib -lc -lm -L/usr/local/lib -I\"/usr/local/include\" -lpari"; -*-*/
 #include <stdio.h>
 #include <string.h>
 #include <pari/pari.h>
