@@ -9,7 +9,7 @@ GP;install("tryfactor","G","tryfactor","./factor.gp.so");
 void tryfactor(char *);
 /*End of prototype*/
 
-const int MAX_SECONDS_FOR_ADDITIONAL_FACTOR = 10;
+const int MAX_SECONDS_FOR_ADDITIONAL_FACTOR = 60;
 
 void
 tryfactor(char *input)
