@@ -1,11 +1,11 @@
-#!/usr/bin/env gnuplot
+#!/usr/bin/env -S gnuplot -persist
 set xdata time
 set timefmt "%Y-%m-%dT%H:%M:%S%z"
 set format x "%m-%d %H:%M"
 set key autotitle columnheader
 set style data lines
 set datafile separator ','
-set terminal wxt enhanced persist size 1800,1080
+set terminal wxt enhanced size 1800,1080
 # set yrange [7.03e8:*]
 start=time(0) - 86400
 # end=strftime("%Y-%m-%dT%H:%M:%S%z", time(0))
