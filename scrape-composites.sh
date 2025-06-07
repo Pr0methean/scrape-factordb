@@ -43,13 +43,18 @@ mkdir -p "/tmp/factordb-composites"
               declare factor
               while read -r factor; do
                 echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
-                curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}" \
-                      | grep -q "Already"
-                if [ $? -eq 0 ]; then
-                  echo "${id}: Factor ${factor} of ${num} already known! Aborting batch."
-                  let "remaining = 0"
+                output=$(curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}")
+                if [ $? -ne 0 ]; then
+                  echo "${id}: Error submitting factor ${factor} of ${num}!"
+                  echo "${num},${factor}" >> "failed-submissions.csv"
                 else
-                  echo "${id}: Factor ${factor} of ${num} accepted."
+                  grep -q "Already" <<< "$output"
+                  if [ $? -eq 0 ]; then
+                    echo "${id}: Factor ${factor} of ${num} already known! Aborting batch."
+                    let "remaining = 0"
+                  else
+                    echo "${id}: Factor ${factor} of ${num} accepted."
+                  fi
                 fi
               done < <(./factor "${num}" | grep -o '[0-9]\+')
               end_time=$(date +%s%N)
