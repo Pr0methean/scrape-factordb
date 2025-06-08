@@ -32,14 +32,15 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
     urls+=("${id}\&open=prime\&basetocheck=${base}")
   done
   for url in "${urls[@]}"; do
-    if sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O /tmp/lastscrape-prp.html <<< "$url"; then
-      if grep -q 'set to C' /tmp/lastscrape-prp.html; then
+    output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- <<< "$url")
+    if [ $? -eq 0 ]; then
+      if grep -q 'set to C' <<< "$output"; then
         echo "Check ruled out PRP"
         break
-      elif grep -q 'Verified' /tmp/lastscrape-prp.html; then
+      elif grep -q 'Verified' <<< "$output"; then
         echo "No longer PRP"
         break
-      elif ! grep -q 'PRP' /tmp/lastscrape-prp.html; then
+      elif ! grep -q 'PRP' <<< "$output"; then
         echo "No longer PRP"
         break
       fi
