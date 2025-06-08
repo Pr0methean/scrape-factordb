@@ -48,6 +48,8 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
 done
 if [ ${bases_left_on_page} -eq 0 ]; then
   start=$((($start + $perpage) % (100000 + $perpage)))
+else
+  start=0
 fi
 done
 
