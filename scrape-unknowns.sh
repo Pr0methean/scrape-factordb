@@ -4,10 +4,11 @@ let "min_start = 0"
 let "max_start = 51"
 let "start = $min_start"
 let "perpage = 3"
-let "waits = 0"
+let "delay = 6"
+let "min_delay = 1"
+let "max_delay = 60"
+let "delay_increment = 5"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
-delays=(4 5 6 7 8 9.3 11 13 16 19.5 23 26.5 30)
-let "max_waits = ${#delays[@]} - 1"
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
 echo $url
@@ -18,24 +19,37 @@ assign_urls=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --
   | sed 's_.*index.php_https://factordb.com/index.php_' \
   | sed 's_$_\&prp=Assign+to+worker_')
 declare assign_url
+let "remaining = $perpage"
 while read -r assign_url; do
+    let "remaining -= 1"
     result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- <<< "${assign_url}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
     echo $result
     grep -q 'Assigned' <<< $result
     if [ $? -eq 0 ]; then
-      if [ $waits -gt 0 ]; then
-        let "waits -= 1"
+      let "delay = (9 * $delay) / 10"
+      if [ $delay -lt $min_delay ]; then
+        let "delay = $min_delay"
       fi
-      sleep ${delays[$waits]}
     else
       grep -q 'Please wait' <<< $result
       if [ $? -eq 0 ]; then
-        let "waits += 2"
-        if [ $waits -gt $max_waits ]; then
-          let "waits = $max_waits"
+        if [ $delay -lt $delay_increment ]; then
+          let "delay *= 2"
+        else
+          let "delay += 5"
+          if [ $delay -gt $max_delay ]; then
+            let "delay = $max_delay"
+          fi
         fi
-        sleep ${delays[$waits]}
+      else
+        continue
       fi
+    fi
+    if [ $remaining -eq 0 ]; then
+      # adjust for the extra delay of loading more search results
+      sleep $(($delay - 1))
+    else
+      sleep ${delay}
     fi
 done <<< "${assign_urls}"
 let "start = ($start + $perpage) % ${max_start}"
