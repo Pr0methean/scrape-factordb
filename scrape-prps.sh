@@ -19,7 +19,8 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
   echo "Checking ID ${id}"
   status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- <<< "${id}\&open=prime\&ct=Proof")
   digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
-  echo "PRP with ID ${id} is ${digits} digits."
+  let "delay = $digits / 400"
+  echo "PRP with ID ${id} is ${digits} digits; will wait ${delay} s between requests."
   bases_checked_html=$(grep -A1 'Bases checked' <<< "$status")
   echo "$bases_checked_html"
   bases_checked_lines=$(grep -o '[0-9]\+' <<< "$bases_checked_html")
@@ -46,7 +47,7 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
         echo "No longer PRP"
         break
       else
-        sleep $((${digits} / 400))
+        sleep ${delay}
       fi
     fi
    done
