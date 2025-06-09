@@ -4,7 +4,7 @@ let "start = 0"
 let "perpage = 3"
 let "delay = 6"
 let "min_delay = 1"
-let "max_delay = 60"
+let "max_delay = 45"
 let "delay_increment = 5"
 let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
@@ -26,7 +26,8 @@ while read -r assign_url; do
     grep -q 'Assigned' <<< $result
     if [ $? -eq 0 ]; then
       let "valid += 1"
-      let "delay = (9 * $delay) / 10"
+      # The following must round down to $min_delay from $min_delay + 1
+      let "delay = (17 * $delay + 5) / 20"
       if [ $delay -lt $min_delay ]; then
         let "delay = $min_delay"
       fi
