@@ -2,9 +2,7 @@
 set -u
 
 urlstart='https://factordb.com/listtype.php?t=1\&mindig='
-if [ ${start} == -1 ]; then
-  start="$(($RANDOM * 3))"
-fi
+let "bases_left_since_restart = 0"
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
@@ -47,10 +45,12 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
     fi
    done
 done
-if [ ${bases_left_on_page} -eq 0 ]; then
-  start=$((($start + $perpage) % (100000 + $perpage)))
-else
+# Restart once we find and attempt 3 * 254 PRP checks that aren't already done
+if [ ${bases_left_since_restart} -ge 762 ]; then
   start=0
+  let "bases_left_since_restart = 0"
+else
+  start=$((($start + $perpage) % (100000 + $perpage)))
 fi
 done
 

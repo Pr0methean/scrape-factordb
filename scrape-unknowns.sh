@@ -1,13 +1,12 @@
 #!/bin/bash
 set -u
-let "min_start = 0"
-let "max_start = 51"
-let "start = $min_start"
+let "start = 0"
 let "perpage = 3"
 let "delay = 6"
 let "min_delay = 1"
 let "max_delay = 60"
 let "delay_increment = 5"
+let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
@@ -26,6 +25,7 @@ while read -r assign_url; do
     echo $result
     grep -q 'Assigned' <<< $result
     if [ $? -eq 0 ]; then
+      let "valid += 1"
       let "delay = (9 * $delay) / 10"
       if [ $delay -lt $min_delay ]; then
         let "delay = $min_delay"
@@ -33,6 +33,7 @@ while read -r assign_url; do
     else
       grep -q 'Please wait' <<< $result
       if [ $? -eq 0 ]; then
+        let "valid += 1"
         if [ $delay -lt $delay_increment ]; then
           let "delay *= 2"
         else
@@ -52,5 +53,10 @@ while read -r assign_url; do
       sleep ${delay}
     fi
 done <<< "${assign_urls}"
-let "start = ($start + $perpage) % ${max_start}"
+if [ $valid -ge $(( $perpage + $perpage )) ]; then
+  let "start = 0"
+  let "valid = 0"
+else
+  let "start += $perpage"
+fi
 done
