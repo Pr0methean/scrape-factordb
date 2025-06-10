@@ -10,8 +10,7 @@ let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
-echo $url
-assign_urls=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --no-check-certificate -nv -O- -o /dev/null "${url}" \
+assign_urls=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate --retry-connrefused -nv -O- <<< "${url}" \
   | pup 'a[href*="index.php?id"] attr{href}' \
   | uniq \
   | tac \
@@ -38,7 +37,7 @@ while read -r assign_url; do
         if [ $delay -lt $delay_increment ]; then
           let "delay *= 2"
         else
-          let "delay += 5"
+          let "delay += $delay_increment"
           if [ $delay -gt $max_delay ]; then
             let "delay = $max_delay"
           fi

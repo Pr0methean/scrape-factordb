@@ -19,7 +19,7 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
   echo "Checking ID ${id}"
   status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- <<< "${id}\&open=prime\&ct=Proof")
   digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
-  let "delay = $digits / 400"
+  let "delay = $digits / 450"
   echo "PRP with ID ${id} is ${digits} digits; will wait ${delay} s between requests."
   bases_checked_html=$(grep -A1 'Bases checked' <<< "$status")
   echo "$bases_checked_html"
@@ -28,8 +28,8 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
   bases=({2..255})
   declare -a bases_left
   readarray -t bases_left < <(echo "${bases[@]} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
-  let "bases_left_on_page += ${#bases_left[@]}"
-  let "bases_left_since_restart += ${bases_left_on_page}"
+  let "bases_left_on_page = ${#bases_left[@]}"
+  let "bases_left_since_restart += ${#bases_left[@]}"
   urls=()
   for base in "${bases_left[@]}"; do
     urls+=("${id}\&open=prime\&basetocheck=${base}")
@@ -54,10 +54,10 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
 done
 # Restart once we have found enough PRP checks that weren't already done
 if [ ${bases_left_since_restart} -ge ${bases_per_restart} ]; then
-  start=0
-  bases_left_since_restart=0
+  let "start = 0"
+  let "bases_left_since_restart = 0"
 else
-  start=$((($start + $perpage) % (100000 + $perpage)))
+  let "start += ${perpage}"
 fi
 done
 
