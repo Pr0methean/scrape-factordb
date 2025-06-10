@@ -10,7 +10,7 @@ let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
-assign_urls=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate --retry-connrefused --retry-on-http-error=502 -T 30 -nv -O- <<< "${url}" \
+assign_urls=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate --retry-connrefused --retry-on-http-error=502 -T 30 -t 3 -nv -O- <<< "${url}" \
   | pup 'a[href*="index.php?id"] attr{href}' \
   | uniq \
   | tac \
@@ -25,7 +25,7 @@ while read -r assign_url; do
     fi
     let "search_succeeded = 1"
     let "remaining -= 1"
-    result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- -T 30 --retry-connrefused --retry-on-http-error=502 <<< "${assign_url}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
+    result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 <<< "${assign_url}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
     echo $result
     grep -q 'Assigned' <<< $result
     if [ $? -eq 0 ]; then
