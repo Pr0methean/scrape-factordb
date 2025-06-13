@@ -16,7 +16,7 @@ mkdir -p "/tmp/factordb-composites"
         url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=${stimulate}&start=${start}&download=1"
         # Don't choose ones ending in 0,2,4,5,6,8, because those are still being trial-factored which may
         # duplicate our work.
-        results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate -O- <<< "$url")
+        results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
         result_count=$(wc -l <<< "$results")
         echo "${id}: Fetched batch of ${result_count} composites with ${digits} or more digits; will factor ${perpage} of them"
         not_trial_factored=$(grep '[024568]$' <<< "$results")
