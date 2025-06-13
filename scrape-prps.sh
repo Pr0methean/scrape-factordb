@@ -1,11 +1,11 @@
 #!/bin/bash
 set -u
 let "start = 0"
-urlstart='https://factordb.com/listtype.php?t=1\&mindig='
+urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "bases_left_since_restart = 0"
 let "bases_per_restart = 254 * $perpage * 2"
 while true; do
-url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
+url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
 results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
 let "bases_left_on_page = -1" # Don't increase start if search fails
@@ -18,9 +18,9 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
   fi
   echo "Checking ID ${id}"
   status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "${id}\&open=prime\&ct=Proof")
-  digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
-  let "delay = ($digits * $digits) / 1000000"
-  echo "PRP with ID ${id} is ${digits} digits; will wait ${delay} s between requests."
+  actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
+  let "delay = ($actual_digits * $actual_digits) / 1000000"
+  echo "PRP with ID ${id} is ${actual_digits} digits; will wait ${delay} s between requests."
   bases_checked_html=$(grep -A1 'Bases checked' <<< "$status")
   echo "$bases_checked_html"
   bases_checked_lines=$(grep -o '[0-9]\+' <<< "$bases_checked_html")
