@@ -57,6 +57,7 @@ mkdir -p "/tmp/factordb-composites"
               done < <(msieve -e -q "${num}" -s "/tmp/msieve_${num}.dat" | grep -o ':[0-9 ]\+' | grep -o '[0-9]\+' | head -n -1 | uniq)
               end_time=$(date +%s%N)
               echo "${id}: $(date -Is): Done factoring ${num} after $(./format-nanos.sh $(($end_time - $start_time)))"
+              rm "/tmp/msieve_${num}.dat"
           else
               echo "${id}: Skipping ${num} because it's already being factored"
           fi
