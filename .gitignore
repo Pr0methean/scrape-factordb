@@ -3,3 +3,5 @@ ff
 stats.csv
 index.php*
 fit.log
+msieve.log
+msieve.dat

@@ -36,7 +36,7 @@ mkdir -p "/tmp/factordb-composites"
           fi
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
-              echo "${id}: $(date -Is): Factoring ${num}"
+              echo "${id}: $(date -Is): Factoring ${num} with msieve"
               start_time=$(date +%s%N)
               declare factor
               while read -r factor; do
@@ -54,7 +54,7 @@ mkdir -p "/tmp/factordb-composites"
                     echo "${id}: Factor ${factor} of ${num} accepted."
                   fi
                 fi
-              done < <(./factor "${num}" | grep -o '[0-9]\+')
+              done < <(msieve -e -v "${num}" | grep -o 'factor:[0-9 ]\+' | grep -o '[0-9]\+')
               end_time=$(date +%s%N)
               echo "${id}: $(date -Is): Done factoring ${num} after $(./format-nanos.sh $(($end_time - $start_time)))"
           fi
