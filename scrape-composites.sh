@@ -54,7 +54,7 @@ mkdir -p "/tmp/factordb-composites"
                     echo "${id}: Factor ${factor} of ${num} accepted."
                   fi
                 fi
-              done < <(msieve -e -v "${num}" | grep -o 'factor:[0-9 ]\+' | grep -o '[0-9]\+')
+              done < <(msieve -e -q "${num}" | grep -o ':[0-9 ]\+' | grep -o '[0-9]\+')
               end_time=$(date +%s%N)
               echo "${id}: $(date -Is): Done factoring ${num} after $(./format-nanos.sh $(($end_time - $start_time)))"
           fi
