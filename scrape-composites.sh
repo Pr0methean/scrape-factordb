@@ -13,6 +13,7 @@ mkdir -p "/tmp/factordb-composites"
         fi
         results=
         url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=${stimulate}&start=${start}&download=1"
+        let "last_start = $(date +%s%N) + $softmax_ns"
         # Don't choose ones ending in 0,2,4,5,6,8, because those are still being trial-factored which may
         # duplicate our work.
         results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
@@ -28,15 +29,14 @@ mkdir -p "/tmp/factordb-composites"
           # sleep $(bc -l <<< "0.003 * $digits * $digits")
           exit 0
         fi
-        remaining=$perpage
 	for num in $(shuf -n ${perpage} <<< $results); do
-          if [ $remaining -le 0 ]; then
-            break
-          fi
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
-              echo "${id}: $(date -Is): Factoring ${num} with msieve"
               start_time=$(date +%s%N)
+              if [ ${start_time} -gt ${last_start} ]; then
+                echo "${id}: Not starting any more factoring because we've been running too long!"
+              fi
+              echo "${id}: $(date -Is): Factoring ${num} with msieve"
               declare factor
               while read -r factor; do
                 echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
@@ -48,7 +48,7 @@ mkdir -p "/tmp/factordb-composites"
                   grep -q "Already" <<< "$output"
                   if [ $? -eq 0 ]; then
                     echo "${id}: Factor ${factor} of ${num} already known! Aborting batch."
-                    let "remaining = 0"
+                    break
                   else
                     echo "${id}: Factor ${factor} of ${num} accepted."
                   fi
@@ -60,7 +60,5 @@ mkdir -p "/tmp/factordb-composites"
           else
               echo "${id}: Skipping ${num} because it's already being factored"
           fi
-          let "remaining -= 1"
-          echo "${id}: ${remaining} composites left in this batch."
 	done
 echo "${id}: Finished batch"

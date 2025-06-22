@@ -15,7 +15,7 @@ while [ ! -f "${fifo_id}" ]; do
   else
     let "perpage = 1"
   fi
-  echo "threads=1 digits=${digits} start=${start} perpage=${perpage} id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
+  echo "threads=1 digits=${digits} start=${start} softmax_ns=3600000000000 id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
   let "job++"
   let "id++"
 done &
