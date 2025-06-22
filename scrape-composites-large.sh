@@ -12,9 +12,12 @@ while [ ! -f "${fifo_id}" ]; do
   let "perpage = 1"
   if [ 13 -eq $(( (job % 43) % 23 )) ]; then
     let "start = 100000"
-    let "perpage = 1"
   else
     let "start = (($job * 91) % 200) * 500"
+  fi
+  if [ $digits -lt 93 ]; then
+    let "perpage = 2"
+  else
     let "perpage = 1"
   fi
   echo "digits=${digits} start=${start} perpage=${perpage} id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
