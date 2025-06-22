@@ -34,7 +34,7 @@ mkdir -p "/tmp/factordb-composites"
           if flock -xn 9; then
               start_time=$(date +%s%N)
               if [ ${start_time} -gt ${last_start} ]; then
-                echo "${id}: Not starting any more factoring because we've been running too long!"
+                echo "${id}: $(date -Is): Not starting any more factoring because we've been running too long!"
               fi
               echo "${id}: $(date -Is): Factoring ${num} with msieve"
               declare factor
