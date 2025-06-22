@@ -1,17 +1,17 @@
 #!/bin/bash
 set -u
-job=1050000
+job=4294967251
 
-# Start at a random point in the cycle of 21*37, and avoid modulo bias
-while [ $job -ge 65268 ]; do
+# Start at a random point in the cycle of 21*25, and avoid modulo bias
+while [ $job -ge 4294967250 ]; do
 #   myrandom=$(openssl rand 3 | od -DAn)
 #   job=$(($myrandom / 160))
-  job=$(openssl rand 2 | od -DAn)
+  job=$(openssl rand 4 | od -DAn)
 done
 
 while : ; do
   let "start = ((job * 8) % 21) * 5000" # start must be in range 0 to 100,000
-  let "digits = ((job * 17) % 37) + 93" # 93-127 digits; too big or on the borderline of what we can factor ourselves
+  let "digits = ((job * 11) % 25) + 105" # 105-127 digits; too big or on the borderline of what we can factor ourselves
   if [ $digits -gt 127 ]; then
     let "start = 0"
     let "digits = 1"
