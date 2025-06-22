@@ -18,7 +18,7 @@ mkdir -p "/tmp/factordb-composites"
         # duplicate our work.
         results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
         result_count=$(wc -l <<< "$results")
-        echo "${id}: Fetched batch of ${result_count} composites with ${digits} or more digits; will factor ${perpage} of them"
+        echo "${id}: Fetched batch of ${result_count} composites with ${digits} or more digits"
         not_trial_factored=$(grep '[024568]$' <<< "$results")
         if [ $? -eq 0 ]; then
           count=$(wc -l <<< "$not_trial_factored")
@@ -29,7 +29,7 @@ mkdir -p "/tmp/factordb-composites"
           # sleep $(bc -l <<< "0.003 * $digits * $digits")
           exit 0
         fi
-	for num in $(shuf -n ${perpage} <<< $results); do
+	for num in $(shuf <<< $results); do
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
               start_time=$(date +%s%N)
