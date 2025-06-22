@@ -15,7 +15,7 @@ while [ ! -f "${fifo_id}" ]; do
   else
     let "start = (($job * 91) % 200) * 500"
   fi
-  if [ $digits -lt 93 ]; then
+  if [ $digits -le 93 ]; then
     let "perpage = 2"
   else
     let "perpage = 1"
