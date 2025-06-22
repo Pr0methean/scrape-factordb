@@ -11,7 +11,7 @@ done
 
 while : ; do
   let "start = ((job * 8) % 21) * 5000" # start must be in range 0 to 100,000
-  let "digits = ((job * 11) % 25) + 105" # 105-127 digits; too big or on the borderline of what we can factor ourselves
+  let "digits = ((job * 11) % 25) + 101" # 101-125 digits; too big or on the borderline of what we can factor ourselves
   if [ $digits -gt 127 ]; then
     let "start = 0"
     let "digits = 1"
