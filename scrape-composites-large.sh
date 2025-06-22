@@ -10,12 +10,14 @@ let "id = 1"
 while [ ! -f "${fifo_id}" ]; do
   let "digits = 101 - (($job * 8) % 13)" # Range of 89-101 digits
   let "start = (($job * 91) % 210) * 500"
+  let "softmax_minutes = 150 - $digits"
+  let "softmax_ns = 60 * 1000 * 1000 * 1000 * $softmax_minutes"
   if [ $digits -le 93 ]; then
     let "perpage = 2"
   else
     let "perpage = 1"
   fi
-  echo "threads=1 digits=${digits} start=${start} softmax_ns=3600000000000 id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
+  echo "threads=1 digits=${digits} start=${start} softmax_ns=${softmax_ns} id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
   let "job++"
   let "id++"
 done &
