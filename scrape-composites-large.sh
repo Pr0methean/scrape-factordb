@@ -17,11 +17,11 @@ while [ ! -f "${fifo_id}" ]; do
   let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
   let "now_ns_of_day = ${now} - ${day_start}"
   if [ ${now_ns_of_day} -gt $((18 * ${hour_ns})) ]; then
-    # softmax ends at 6am
-    let "softmax_ns = 30 * ${hour_ns} + ${day_start} - ${now}"
-  elif [ ${now_ns_of_day} -lt $((5 * ${hour_ns})) ]; then
-    # softmax can't end before 6am but may end later
-    let "min_softmax_ns = 6 * ${hour_ns} + ${day_start} - ${now}"
+    # softmax ends at 8am
+    let "softmax_ns = 32 * ${hour_ns} + ${day_start} - ${now}"
+  elif [ ${now_ns_of_day} -lt $((7 * ${hour_ns})) ]; then
+    # softmax can't end before 8am but may end later
+    let "min_softmax_ns = 8 * ${hour_ns} + ${day_start} - ${now}"
     if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
       let "softmax_ns = ${min_softmax_ns}"
     fi
