@@ -20,7 +20,7 @@ mkdir -p "/tmp/factordb-composites"
         result_count=$(wc -l <<< "$results")
         echo "${id}: Fetched batch of ${result_count} composites with ${digits} or more digits"
         not_trial_factored=$(grep '[024568]$' <<< "$results")
-        let "done_something = 0"
+        let "previous = 0"
         if [ $? -eq 0 ]; then
           count=$(wc -l <<< "$not_trial_factored")
           first=$(head -n 1 <<< "$not_trial_factored")
@@ -34,13 +34,13 @@ mkdir -p "/tmp/factordb-composites"
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
               start_time=$(date +%s%N)
-              if [ ${done_something} -gt 0 -a ${start_time} -gt ${last_start} ]; then
-                echo "${id}: $(date -Is): Not starting any more factoring because we've been running too long!"
+              if [ ${previous} -gt 0 -a ${start_time} -gt ${last_start} ]; then
+                echo "${id}: $(date -Is): ${previous} factors found this job; not starting any more factoring because we've been running too long!"
               fi
-              echo "${id}: $(date -Is): Factoring ${num} with msieve"
+              echo "${id}: $(date -Is): ${previous} factors found this job; factoring ${num} with msieve"
               declare factor
               while read -r factor; do
-                let "done_something = 1"
+                let "previous += 1"
                 echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
                 output=$(curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}")
                 if [ $? -ne 0 ]; then
