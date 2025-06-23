@@ -36,6 +36,7 @@ mkdir -p "/tmp/factordb-composites"
               start_time=$(date +%s%N)
               if [ ${previous} -gt 0 -a ${start_time} -gt ${last_start} ]; then
                 echo "${id}: $(date -Is): ${previous} factors found this job; not starting any more factoring because we've been running too long!"
+                break
               fi
               echo "${id}: $(date -Is): ${previous} factors found this job; factoring ${num} with msieve"
               declare factor
