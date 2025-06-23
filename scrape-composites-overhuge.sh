@@ -11,7 +11,7 @@ done
 
 while : ; do
   let "perpage = 500"
-  let "start = ((job * 103) % 210) * 500" 
+  let "start = ((job * 23) % 210) * 500" 
   let "digits = ((job * 11) % 25) + 101" # 101-123 digits; too big or on the borderline of what we can factor ourselves
   if [ $digits -gt 123 ]; then
     let "start = 0"
