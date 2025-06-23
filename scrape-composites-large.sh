@@ -7,11 +7,25 @@ while [ $job -ge "65520" ]; do # Select random point in the 13*210 cycle
   let "job = $(openssl rand 2 | od -DAn)"
 done
 let "id = 1"
+let "minute_ns = 60 * 1000 * 1000 * 1000"
+let "hour_ns = 60 * ${minute_ns}"
 while [ ! -f "${fifo_id}" ]; do
   let "digits = 101 - (($job * 8) % 13)" # Range of 89-101 digits
   let "start = (($job * 91) % 210) * 500"
-  let "softmax_minutes = 150 - $digits"
-  let "softmax_ns = 60 * 1000 * 1000 * 1000 * $softmax_minutes"
+  let "now = $(date +%s%N)"
+  let "day_start = ($now / (24 * ${hour_ns})) * (24 * ${hour_ns})"
+  let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
+  let "now_ns_of_day = ${now} - ${day_start}"
+  if [ ${now_ns_of_day} -gt $((18 * ${hour_ns})) ]; then
+    # softmax ends at 6am
+    let "softmax_ns = 30 * ${hour_ns} + ${day_start} - ${now}"
+  elif [ ${now_ns_of_day} -lt $((5 * ${hour_ns})) ]; then
+    # softmax can't end before 6am but may end later
+    let "min_softmax_ns = 6 * ${hour_ns} + ${day_start} - ${now}"
+    if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
+      let "softmax_ns = ${min_softmax_ns}"
+    fi
+  fi
   if [ $digits -le 93 ]; then
     let "perpage = 2"
   else
