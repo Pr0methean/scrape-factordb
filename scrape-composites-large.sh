@@ -17,6 +17,7 @@ while [ ! -f "${fifo_id}" ]; do
   if [ ${now_ns_of_day} -lt $((16 * ${hour_ns})) ]; then
     # when starting between 00:00 and 16:00 UTC (16:00 and 08:00 PST), softmax extends until 16:00 UTC
     let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day}"
+    echo "Using min_softmax_ns of ${min_softmax_ns} due to nighttime"
     let "extra_digits = 3"
   else
     let "min_softmax_ns = 0"
