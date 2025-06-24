@@ -18,7 +18,6 @@ mkdir -p "/tmp/factordb-composites"
         # duplicate our work.
         results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
         not_trial_factored=$(grep '[024568]$' <<< "$results")
-        let "previous = 0"
         if [ $? -eq 0 ]; then
           count=$(wc -l <<< "$not_trial_factored")
           first=$(head -n 1 <<< "$not_trial_factored")
@@ -28,6 +27,7 @@ mkdir -p "/tmp/factordb-composites"
           # sleep $(bc -l <<< "0.003 * $digits * $digits")
           exit 0
         fi
+        let "previous = 0"
         declare exact_size_results
         if [ $digits -ge 89 ]; then
           # Assume exact size, since there are so many numbers in these sizes
@@ -64,7 +64,7 @@ mkdir -p "/tmp/factordb-composites"
                   grep -q "Already" <<< "$output"
                   if [ $? -eq 0 ]; then
                     echo "${id}: Factor ${factor} of ${num} already known! Aborting batch."
-                    break
+                    exit 0
                   else
                     echo "${id}: Factor ${factor} of ${num} accepted."
                   fi
