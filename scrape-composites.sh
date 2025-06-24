@@ -17,8 +17,6 @@ mkdir -p "/tmp/factordb-composites"
         # Don't choose ones ending in 0,2,4,5,6,8, because those are still being trial-factored which may
         # duplicate our work.
         results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
-        result_count=$(wc -l <<< "$results")
-        echo "${id}: Fetched batch of ${result_count} composites with ${digits} or more digits"
         not_trial_factored=$(grep '[024568]$' <<< "$results")
         let "previous = 0"
         if [ $? -eq 0 ]; then
@@ -30,7 +28,22 @@ mkdir -p "/tmp/factordb-composites"
           # sleep $(bc -l <<< "0.003 * $digits * $digits")
           exit 0
         fi
-	for num in $(shuf <<< $results); do
+        declare exact_size_results
+        if [ $digits -ge 89 ]; then
+          # Assume exact size, since there are so many numbers in these sizes
+          let "exact_size_results = $results"
+          echo "${id}: Fetched batch of ${result_count} composites with ${digits} digits"
+        else
+          exact_size_results=$(grep "^[0-9]\{${digits}\}\$" <<< "$results")
+          result_count=$(wc -l <<< "$exact_size_results")
+          if [ ${result_count} -eq 0 ]; then
+            exact_size_results=$(shuf -n 1 <<< ${results})
+            echo "${id}: No results with exactly ${digits} digits, so factoring one larger composite instead"
+          else
+            echo "${id}: Fetched batch of ${result_count} composites with ${digits} digits"
+          fi
+        fi
+	for num in $(shuf <<< ${exact_size_results}); do
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
               start_time=$(date +%s%N)
