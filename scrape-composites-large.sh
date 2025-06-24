@@ -12,17 +12,17 @@ let "hour_ns = 60 * ${minute_ns}"
 while [ ! -f "${fifo_id}" ]; do
   let "start = (($job * 91) % 210) * 500"
   let "now = $(date +%s%N)"
-  let "day_start = ($now / (24 * ${hour_ns})) * (24 * ${hour_ns})"
+  let "day_start = (${now} / (24 * ${hour_ns})) * (24 * ${hour_ns})"
   let "now_ns_of_day = ${now} - ${day_start}"
-  if [ ${now_ns_of_day} -lt $((15 * ${hour_ns})) -a ${now_ns_of_day} -gt $((2 * ${hour_ns})) ]; then
-    # softmax ends at 16:00 UTC (08:00 PST)
-    let "min_softmax_ns = 16 * ${hour_ns} + ${day_start} - ${now}"
+  if [ ${now_ns_of_day} -lt $((16 * ${hour_ns})) ]; then
+    # when starting between 00:00 and 16:00 UTC (16:00 and 08:00 PST), softmax extends until 16:00 UTC
+    let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day}"
     let "extra_digits = 3"
   else
     let "min_softmax_ns = 0"
     let "extra_digits = 0"
   fi
-  let "digits = 89 + (($job * 4) % 11) + $extra_digits" # Range of 89-99 digits during day, 92-102 at night
+  let "digits = 89 + (($job * 4) % 11) + ${extra_digits}" # Range of 89-99 digits during day, 92-102 at night
   let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
   if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
     let "softmax_ns = ${min_softmax_ns}"
