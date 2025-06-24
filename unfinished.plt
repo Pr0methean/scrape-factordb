@@ -12,5 +12,6 @@ a=0.45
 b=1.5e9
 FIT_LIMIT=1e-16
 fit f(x) 'stats.csv' using 1:($3 + $5 + $6) via a, b
+set xrange noextend
 plot 'stats.csv' using 1:($3 + $5 + $6) title "Unfinished entries", f(x) title "Trendline"
 pause -1
