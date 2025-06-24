@@ -49,14 +49,13 @@ while read -r assign_url; do
         fi
         if [ $remaining -gt 0 ]; then
           sleep ${delay}
+        else
+          # adjust for the extra delay of loading more search results
+          sleep $(($delay - 1))
         fi
       else
         continue
       fi
-    fi
-    if [ $remaining -eq 0 ]; then
-      # adjust for the extra delay of loading more search results
-      sleep $(($delay - 1))
     fi
 done <<< "${assign_urls}"
 if [ $valid -ge $(( $perpage + $perpage )) ]; then
