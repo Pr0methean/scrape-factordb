@@ -19,19 +19,22 @@ while [ ! -f "${fifo_id}" ]; do
     let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day}"
     echo "Using min_softmax_ns of ${min_softmax_ns} due to nighttime"
     let "digits = 89 + (($job * 5) % 13)" # Range of 89-101 digits at night
-    let "extra_digits = 10"
+    let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
+    if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
+      let "softmax_ns = ${min_softmax_ns}"
+    fi
   else
-    let "min_softmax_ns = 0"
     let "digits = 60 + (($job * 20) % 37)" # Range of 60-96 digits during day
+    if [ $digits -ge 90 ]; then
+      let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
+    else
+      let "softmax_ns = ${hour_ns}"
+    fi
   fi
-  let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
   if [ $digits -ge 89 ]; then
     let "start = (($job * 91) % 210) * 500"
   else
     let "start = 0"
-  fi
-  if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
-    let "softmax_ns = ${min_softmax_ns}"
   fi
   echo "threads=1 digits=${digits} start=${start} softmax_ns=${softmax_ns} id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
   let "job++"
