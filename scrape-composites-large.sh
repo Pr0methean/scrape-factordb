@@ -25,11 +25,7 @@ while [ ! -f "${fifo_id}" ]; do
     fi
   else
     let "digits = 60 + (($job * 20) % 37)" # Range of 60-96 digits during day
-    if [ $digits -ge 90 ]; then
-      let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
-    else
-      let "softmax_ns = ${hour_ns}"
-    fi
+    let "softmax_ns = (110 - ${digits}) * ${minute_ns}"
   fi
   if [ $digits -ge 89 ]; then
     let "start = (($job * 91) % 210) * 500"
