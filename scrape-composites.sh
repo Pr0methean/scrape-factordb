@@ -31,8 +31,8 @@ mkdir -p "/tmp/factordb-composites"
         declare exact_size_results
         if [ $digits -ge 89 ]; then
           # Assume exact size, since there are so many numbers in these sizes
-          let "exact_size_results = $results"
           echo "${id}: Fetched batch of ${stimulate} composites with ${digits} digits"
+          exact_size_results="${results}"
         else
           exact_size_results=$(grep "^[0-9]\{${digits}\}\$" <<< "$results")
           result_count=$(wc -l <<< "$exact_size_results")
