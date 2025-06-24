@@ -53,8 +53,6 @@ while read -r assign_url; do
           # adjust for the extra delay of loading more search results
           sleep $(($delay - 1))
         fi
-      else
-        continue
       fi
     fi
 done <<< "${assign_urls}"
