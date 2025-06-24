@@ -47,6 +47,9 @@ while read -r assign_url; do
             let "delay = $max_delay"
           fi
         fi
+        if [ $remaining -gt 0 ]; then
+          sleep ${delay}
+        fi
       else
         continue
       fi
@@ -54,8 +57,6 @@ while read -r assign_url; do
     if [ $remaining -eq 0 ]; then
       # adjust for the extra delay of loading more search results
       sleep $(($delay - 1))
-    else
-      sleep ${delay}
     fi
 done <<< "${assign_urls}"
 if [ $valid -ge $(( $perpage + $perpage )) ]; then
