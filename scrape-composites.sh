@@ -6,7 +6,7 @@ mkdir -p "/tmp/factordb-composites"
 #	fi
         # Requesting lots of composites seems to trigger the server to factor the ones it's returning, so
         # request more than we intend to process and choose a subrange of the results at random to process.
-        let "stimulate = 500"
+        let "stimulate = 100"
         if [ ${start} -ge 100000 ]; then # have found 82-digit number that failed trial-factor check! It was 1198868704222996263303115787159415601283338389691502276178405658986301757674152006 on 2025-02-14 ~04:00Z          if [ ${start} -ge 100000 ]; then
             let "start = 100000"
           let "stimulate = 5000"

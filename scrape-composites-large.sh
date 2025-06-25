@@ -3,7 +3,7 @@ set -u
 fifo_id="/tmp/$(uuidgen)"
 mkfifo "${fifo_id}"
 let "job = 99999999"
-while [ $job -ge "16767660" ]; do # Select random point in the 13*37*210 cycle
+while [ $job -ge "16666650" ]; do # Select random point in the 13*37*1050 cycle
   let "job = $(openssl rand 3 | od -DAn)"
 done
 let "id = 1"
@@ -28,7 +28,7 @@ while [ ! -f "${fifo_id}" ]; do
     let "softmax_ns = (110 - ${digits}) * ${minute_ns}"
   fi
   if [ $digits -ge 89 ]; then
-    let "start = (($job * 91) % 210) * 500"
+    let "start = (($job * 523) % 1050) * 100"
   else
     let "start = 0"
   fi
