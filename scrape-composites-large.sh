@@ -17,7 +17,7 @@ while [ ! -f "${fifo_id}" ]; do
   if [ ${now_hour_of_day} -lt 16 -a ${now_hour_of_day} -ge 2 ]; then
     # when starting between 02:00 and 16:00 UTC (18:00 and 08:00 PST), softmax extends until 16:00 UTC
     let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day}"
-    echo "Using min_softmax_ns of ${min_softmax_ns} due to nighttime"
+    echo "Using softmax running time of $(./format_nanos.sh ${min_softmax_ns}) due to nighttime"
     let "digits = 89 + (($job * 5) % 13)" # Range of 89-101 digits at night
     let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
     if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then

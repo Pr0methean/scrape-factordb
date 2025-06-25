@@ -27,7 +27,6 @@ mkdir -p "/tmp/factordb-composites"
           # sleep $(bc -l <<< "0.003 * $digits * $digits")
           exit 0
         fi
-        let "previous = 0"
         declare exact_size_results
         if [ $digits -ge 89 ]; then
           # Assume exact size, since there are so many numbers in these sizes
@@ -43,18 +42,21 @@ mkdir -p "/tmp/factordb-composites"
             echo "${id}: Fetched batch of ${result_count} composites with ${digits} digits"
           fi
         fi
+        let "factors_so_far = 0"
+        let "composites_so_far = 0"
 	for num in $(shuf <<< ${exact_size_results}); do
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
               start_time=$(date +%s%N)
-              if [ ${previous} -gt 0 -a ${start_time} -gt ${last_start} ]; then
-                echo "${id}: $(date -Is): ${previous} factors found this job; not starting any more factoring because we've been running too long!"
-                break
+              if [ ${factors_so_far} -gt 0 -a ${start_time} -gt ${last_start} ]; then
+                echo "${id}: $(date -Is): Running time limit reached after ${factors_so_far} factors and ${composites_so_far} composites"
+                exit 0
               fi
-              echo "${id}: $(date -Is): ${previous} factors found this job; factoring ${num} with msieve"
+              echo "${id}: $(date -Is): ${factors_so_far} factors and ${composites_so_far} done so far. Factoring ${num} with msieve"
               declare factor
+              let "composites_so_far += 1"
               while read -r factor; do
-                let "previous += 1"
+                let "factors_so_far += 1"
                 echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
                 output=$(curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}")
                 if [ $? -ne 0 ]; then
@@ -63,7 +65,7 @@ mkdir -p "/tmp/factordb-composites"
                 else
                   grep -q "Already" <<< "$output"
                   if [ $? -eq 0 ]; then
-                    echo "${id}: Factor ${factor} of ${num} already known! Aborting batch."
+                    echo "${id}: Factor ${factor} of ${num} already known! Aborting batch after ${factors_so_far} factors and ${composites_so_far} composites."
                     exit 0
                   else
                     echo "${id}: Factor ${factor} of ${num} accepted."
@@ -77,4 +79,4 @@ mkdir -p "/tmp/factordb-composites"
               echo "${id}: Skipping ${num} because it's already being factored"
           fi
 	done
-echo "${id}: Finished batch"
+echo "${id}: Finished all factoring after ${composites_so_far} composites and ${factors_so_far} factors."
