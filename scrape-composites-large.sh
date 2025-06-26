@@ -7,8 +7,6 @@ while [ $job -ge "16666650" ]; do # Select random point in the 13*37*1050 cycle
   let "job = $(openssl rand 3 | od -DAn)"
 done
 let "id = 1"
-let "minute_ns = 60 * 1000 * 1000 * 1000"
-let "hour_ns = 60 * ${minute_ns}"
 while [ ! -f "${fifo_id}" ]; do
   echo "threads=1 job=${job} id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
   let "job++"
