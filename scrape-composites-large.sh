@@ -10,29 +10,7 @@ let "id = 1"
 let "minute_ns = 60 * 1000 * 1000 * 1000"
 let "hour_ns = 60 * ${minute_ns}"
 while [ ! -f "${fifo_id}" ]; do
-  let "now = $(date +%s%N)"
-  let "day_start = (${now} / (24 * ${hour_ns})) * (24 * ${hour_ns})"
-  let "now_ns_of_day = ${now} - ${day_start}"
-  let "now_hour_of_day = ${now_ns_of_day} / ${hour_ns}"
-  if [ ${now_hour_of_day} -lt 16 -a ${now_hour_of_day} -ge 2 ]; then
-    # when starting between 02:00 and 16:00 UTC (18:00 and 08:00 PST), softmax extends until 16:00 UTC
-    let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day}"
-    let "digits = 89 + (($job * 5) % 13)" # Range of 89-101 digits at night
-    let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
-    if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
-      let "softmax_ns = ${min_softmax_ns}"
-    fi
-  else
-    let "digits = 60 + (($job * 20) % 37)" # Range of 60-96 digits during day
-    let "softmax_ns = (110 - ${digits}) * ${minute_ns}"
-  fi
-  echo "${id}: I will factor ${digits}-digit composites for at least $(./format_nanos.sh ${min_softmax_ns})"
-  if [ $digits -ge 89 ]; then
-    let "start = (($job * 523) % 1050) * 100"
-  else
-    let "start = 0"
-  fi
-  echo "threads=1 digits=${digits} start=${start} softmax_ns=${softmax_ns} id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
+  echo "threads=1 job=${job} id=${id} nice=0 ./scrape-composites.sh" >> "${fifo_id}"
   let "job++"
   let "id++"
 done &

@@ -11,9 +11,30 @@ mkdir -p "/tmp/factordb-composites"
             let "start = 100000"
           let "stimulate = 5000"
         fi
+        let "now = $(date +%s%N)"
         results=
         url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=${stimulate}&start=${start}&download=1"
         let "last_start = $(date +%s%N) + $softmax_ns"
+        let "day_start = (${now} / (24 * ${hour_ns})) * (24 * ${hour_ns})"
+        let "now_ns_of_day = ${now} - ${day_start}"
+        let "now_hour_of_day = ${now_ns_of_day} / ${hour_ns}"
+        if [ ${now_hour_of_day} -lt 16 -a ${now_hour_of_day} -ge 2 ]; then
+          # when starting between 02:00 and 16:00 UTC (18:00 and 08:00 PST), softmax extends until 16:00 UTC
+          let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day}"
+          let "digits = 89 + (($job * 5) % 13)" # Range of 89-101 digits at night
+          let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
+          if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
+            let "softmax_ns = ${min_softmax_ns}"
+          fi
+        else
+          let "digits = 60 + (($job * 20) % 37)" # Range of 60-96 digits during day
+          let "softmax_ns = (110 - ${digits}) * ${minute_ns}"
+        fi
+        if [ $digits -ge 89 ]; then
+          let "start = (($job * 523) % 1050) * 100"
+        else
+          let "start = 0"
+        fi
         # Don't choose ones ending in 0,2,4,5,6,8, because those are still being trial-factored which may
         # duplicate our work.
         results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
@@ -42,6 +63,7 @@ mkdir -p "/tmp/factordb-composites"
             echo "${id}: Fetched batch of ${result_count} composites with ${digits} digits"
           fi
         fi
+        echo "${id}: I will factor these composites for at least $(./format_nanos.sh ${min_softmax_ns})"
         let "factors_so_far = 0"
         let "composites_so_far = 0"
 	for num in $(shuf <<< ${exact_size_results}); do
