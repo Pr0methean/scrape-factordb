@@ -1,5 +1,5 @@
 #!/bin/sh
-echo 12 > /tmp/scrape-composites-large-threads
+echo 10 > /tmp/scrape-composites-large-threads
 gnome-terminal --tab --title=Stats -- nice -+19 ./scrape-stats.sh
 # gnome-terminal --tab --title=TinyComposites -- bash -c "nice -+19 ./scrape-composites-tiny.sh 2>&1 | tee /tmp/scrape-composites-tiny.txt"
 gnome-terminal --tab --title=U -- bash -c "digits=2001 nice -+19 ./scrape-unknowns.sh 2>&1 | tee /tmp/scrape-unknowns.txt"
