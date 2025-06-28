@@ -52,7 +52,7 @@ let "hour_ns = 60 * ${minute_ns}"
           exit 0
         fi
         declare exact_size_results
-        if [ $digits -ge 89 ]; then
+.        if [ $digits -ge 89 ]; then
           # Assume exact size, since there are so many numbers in these sizes
           echo "${id}: Fetched batch of ${stimulate} composites with ${digits} digits"
           exact_size_results="${results}"
@@ -104,4 +104,6 @@ let "hour_ns = 60 * ${minute_ns}"
               echo "${id}: Skipping ${num} because it's already being factored"
           fi
 	done
-echo "${id}: Finished all factoring after ${composites_so_far} composites and ${factors_so_far} factors."
+if [ ${factors_so_far} -gt 0 ]; then
+  echo "${id}: Finished all factoring after ${composites_so_far} composites and ${factors_so_far} factors."
+fi
