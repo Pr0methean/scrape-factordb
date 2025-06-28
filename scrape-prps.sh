@@ -3,7 +3,7 @@ set -u
 let "start = 0"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "bases_left_since_restart = 0"
-let "bases_per_restart = 254 * $perpage * 3"
+let "bases_per_restart = 254 * $perpage * 5"
 while true; do
 url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
