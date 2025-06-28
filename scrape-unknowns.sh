@@ -11,11 +11,9 @@ urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
 assign_urls=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate --retry-connrefused --retry-on-http-error=502 -T 30 -t 3 -nv -O- <<< "${url}" \
-  | pup 'a[href*="index.php?id"] attr{href}' \
+  | grep -o 'index.php?id=[0-9]\+' \
   | uniq \
-  | tac \
-  | sed 's_.*index.php_https://factordb.com/index.php_' \
-  | sed 's_$_\&prp=Assign+to+worker_')
+  | tac)
 declare assign_url
 let "remaining = $perpage"
 let "search_succeeded = 0"
@@ -23,6 +21,7 @@ while read -r assign_url; do
     if [ "${assign_url}" == "" ]; then
       continue
     fi
+    assign_url="https://factordb.com/${assign_url}\&prp=Assign+to+worker"
     let "search_succeeded = 1"
     let "remaining -= 1"
     result=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 <<< "${assign_url}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
