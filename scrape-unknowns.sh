@@ -49,7 +49,7 @@ while read -r assign_url; do
         fi
         if [ $remaining -gt 0 ]; then
           sleep ${delay}
-        else
+        elif [ $delay -gt 1 ]; then
           # adjust for the extra delay of loading more search results
           sleep $(($delay - 1))
         fi
