@@ -9,15 +9,14 @@ url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
 results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
 let "bases_left_on_page = -1" # Don't increase start if search fails
-for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
+for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   | uniq \
-  | sed 's_.*index.php_https://factordb.com/index.php_' \
 ); do
   if [ ${bases_left_on_page} -eq -1 ]; then
     let "bases_left_on_page = 0"
   fi
   echo "Checking ID ${id}"
-  status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "${id}\&open=prime\&ct=Proof")
+  status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "https://factordb.com/${id}\&open=prime\&ct=Proof")
 #  actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
 #  let "delay = ($actual_digits * $actual_digits) / 1000000"
 #  echo "PRP with ID ${id} is ${actual_digits} digits; will wait ${delay} s between requests."
@@ -32,7 +31,7 @@ for id in $(pup 'a[href*="index.php?id"] attr{href}' <<< "$results" \
   let "bases_left_since_restart += ${#bases_left[@]}"
   urls=()
   for base in "${bases_left[@]}"; do
-    urls+=("${id}\&open=prime\&basetocheck=${base}")
+    urls+=("https://factordb.com/${id}\&open=prime\&basetocheck=${base}")
   done
   for url in "${urls[@]}"; do
     output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
