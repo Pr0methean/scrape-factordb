@@ -104,6 +104,4 @@ let "hour_ns = 60 * ${minute_ns}"
               echo "${id}: Skipping ${num} because it's already being factored"
           fi
 	done
-if [ ${factors_so_far} -gt 0 ]; then
-  echo "${id}: Finished all factoring after ${composites_so_far} composites and ${factors_so_far} factors."
-fi
+echo "${id}: Finished all factoring after ${composites_so_far} composites and ${factors_so_far} factors."
