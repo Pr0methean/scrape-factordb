@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 let "start = 0"
-let "perpage = 3"
+let "perpage = 6"
 let "min_delay = 1"
 let "max_delay = 45"
 let "delay = ${min_delay} * 2"
@@ -17,7 +17,7 @@ assign_urls=$(sem --id 'factordb-curl' -j 4 xargs wget -e robots=off --no-check-
   | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_')
 let "remaining = $perpage"
 let "search_succeeded = 0"
-results=$(sem --id 'factordb-curl' -j 4 xargs -n 1 wget -e robots=off --no-check-certificate -nv -O- -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 <<< "${assign_urls}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
+results=$(sem --id 'factordb-curl' -j 4 xargs -n 2 wget -e robots=off --no-check-certificate -nv -O- -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 <<< "${assign_urls}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
     echo $results
     grep -q 'Please wait' <<< $results
     if [ $? -eq 0 ]; then
