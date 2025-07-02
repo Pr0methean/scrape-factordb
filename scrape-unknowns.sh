@@ -10,14 +10,14 @@ let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
-assign_urls=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate --retry-connrefused --retry-on-http-error=502 -T 30 -t 3 -nv -O- <<< "${url}" \
+assign_urls=$(sem --id 'factordb-curl' -j 4 xargs wget -e robots=off --no-check-certificate --retry-connrefused --retry-on-http-error=502 -T 30 -t 3 -nv -O- <<< "${url}" \
   | grep -o 'index.php?id=[0-9]\+' \
   | uniq \
   | tac \
   | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_')
 let "remaining = $perpage"
 let "search_succeeded = 0"
-results=$(sem --id 'factordb-curl' --ungroup -j 4 xargs wget -e robots=off --no-check-certificate -nv -O- -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 <<< "${assign_urls}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
+results=$(sem --id 'factordb-curl' -j 4 xargs -n 1 wget -e robots=off --no-check-certificate -nv -O- -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 <<< "${assign_urls}" | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
     echo $results
     grep -q 'Please wait' <<< $results
     if [ $? -eq 0 ]; then
