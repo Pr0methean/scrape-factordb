@@ -9,12 +9,10 @@ url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
 results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
 let "bases_left_on_page = -1" # Don't increase start if search fails
+children=()
 for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
-  | uniq \
-); do
-  if [ ${bases_left_on_page} -eq -1 ]; then
-    let "bases_left_on_page = 0"
-  fi
+  | uniq); do
+  (
   echo "Checking ID ${id}"
   status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "https://factordb.com/${id}\&open=prime\&ct=Proof")
 #  actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
@@ -29,11 +27,9 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   readarray -t bases_left < <(echo "${bases[@]} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
   let "bases_left_on_page = ${#bases_left[@]}"
   let "bases_left_since_restart += ${#bases_left[@]}"
-  urls=()
   for base in "${bases_left[@]}"; do
-    urls+=("https://factordb.com/${id}\&open=prime\&basetocheck=${base}")
-  done
-  for url in "${urls[@]}"; do
+    touch /tmp/prp_base_checked
+    url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
     output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
     if [ $? -eq 0 ]; then
       if grep -q 'set to C' <<< "$output"; then
@@ -49,12 +45,16 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
 #        sleep ${delay}
       fi
     fi
-   done
+  done
+  ) &
 done
+wait
+
 # Restart once we have found enough PRP checks that weren't already done
-if [ ${bases_left_since_restart} -ge ${bases_per_restart} -o ${bases_left_on_page} -eq -1 ]; then
+if [ -e /tmp/prp_base_checked -a $start -gt 0 ]; then
   let "start = 0"
   let "bases_left_since_restart = 0"
+  rm /tmp/prp_base_checked
 else
   let "start += ${perpage}"
 fi
