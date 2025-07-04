@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 let "start = 0"
-let "perpage = 18"
+let "perpage = 9"
 let "pertask = 3"
 let "min_delay = 1"
 let "max_delay = 45"
