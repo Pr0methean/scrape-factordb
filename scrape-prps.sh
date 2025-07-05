@@ -49,12 +49,11 @@ done
 wait
 
 # Restart once we have found enough PRP checks that weren't already done
-let "bases_checked_since_restart = $(find "/tmp/prp" -type f -printf '.' | wc -m)"
+let "bases_checked_since_restart = $(find '/tmp/prp' -type f -printf '.' | wc -m)"
 if [ $start -gt 0 -a ${bases_checked_since_restart} -gt ${bases_per_restart} ]; then
   let "bases_checked_since_restart = 0"
   let "start = 0"
   rm "/tmp/prp/*"
-# elif [ ${bases_checked_since_restart} -gt ${bases_checked_before_page} ]; then
 else
   let "start += ${perpage}"
 fi
