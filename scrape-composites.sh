@@ -8,8 +8,8 @@ let "hour_ns = 60 * ${minute_ns}"
 #		start="$(($RANDOM * 3))"
 #	fi
         # Requesting lots of composites seems to trigger the server to factor the ones it's returning, so
-        # request more than we intend to process and choose a subrange of the results at random to process.
-        let "stimulate = 100"
+        # request the next power of 2 up from the maximum number we can possibly process
+        let "stimulate = 64"
         let "now = $(date +%s%N)"
         results=
         let "day_start = (${now} / (24 * ${hour_ns})) * (24 * ${hour_ns})"
@@ -29,7 +29,7 @@ let "hour_ns = 60 * ${minute_ns}"
         fi
         let "last_start = $(date +%s%N) + $softmax_ns"
         if [ $digits -ge 89 ]; then
-          let "start = (($job * 523) % 1050) * 100"
+          let "start = (($job * 809) % 1641) * 64"
         else
           let "start = 0"
         fi
