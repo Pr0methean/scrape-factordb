@@ -21,7 +21,6 @@ IFS=$'\n'
 assign_urls=($assign_urls)
 IFS=' '
 echo "$(date -Iseconds): Got ${#assign_urls[@]} URLs"
-let "remaining = $perpage"
 let "search_succeeded = 0"
 all_results=''
 for (( i=0; i<$perpage; i+=$pertask )); do
