@@ -3,10 +3,6 @@ set -u
 let "start = 0"
 let "perpage = 63"
 let "pertask = 3"
-let "min_delay = 1"
-let "max_delay = 45"
-let "delay = ${min_delay} * 2"
-let "delay_increment = 5"
 let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
@@ -33,29 +29,9 @@ for (( i=0; i<$perpage; i+=$pertask )); do
     all_results="$all_results // $results"
 done
 grep -q 'Assigned' <<< $all_results
-    if [ $? -eq 0 ]; then
-      let "valid += 1"
-      # The following must round down to $min_delay from $min_delay + 1
-      let "delay = (17 * $delay + 5) / 20"
-      if [ $delay -lt $min_delay ]; then
-        let "delay = $min_delay"
-      fi
-    else
-      grep -q 'Please wait' <<< $all_results
-      if [ $? -eq 0 ]; then
-        let "valid = 1"
-        if [ $delay -lt $delay_increment ]; then
-          let "delay *= 2"
-        else
-          let "delay += $delay_increment"
-          if [ $delay -gt $max_delay ]; then
-            let "delay = $max_delay"
-          fi
-        fi
-        # adjust for the extra delay of loading more search results
-        sleep $(($delay - 1))
-      fi
-    fi
+if [ $? -eq 0 ]; then
+  let "valid += 1"
+fi
 if [ $valid -ge 2 ]; then
   let "start = 0"
   let "valid = 0"
