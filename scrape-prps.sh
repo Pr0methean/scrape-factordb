@@ -1,15 +1,15 @@
 #!/bin/bash
 set -u
+mkdir "/tmp/prp"
+rm "/tmp/prp/*"
 let "start = 0"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
-let "bases_left_since_restart = 0"
+let "bases_checked_before_page = 0"
 let "bases_per_restart = 254 * $perpage * 5"
 while true; do
 url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
 results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
-let "bases_left_on_page = -1" # Don't increase start if search fails
-children=()
 for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   | uniq); do
   (
@@ -25,10 +25,8 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   bases=({2..255})
   declare -a bases_left
   readarray -t bases_left < <(echo "${bases[@]} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
-  let "bases_left_on_page = ${#bases_left[@]}"
-  let "bases_left_since_restart += ${#bases_left[@]}"
   for base in "${bases_left[@]}"; do
-    touch /tmp/prp_base_checked
+    touch /tmp/prp/id_${id}_base_${base}
     url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
     output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
     if [ $? -eq 0 ]; then
@@ -51,12 +49,15 @@ done
 wait
 
 # Restart once we have found enough PRP checks that weren't already done
-if [ -e /tmp/prp_base_checked -a $start -gt 0 ]; then
+let "bases_checked_since_restart = $(find "/tmp/prp" -type f -printf '.' | wc -m)"
+if [ $start -gt 0 -a ${bases_checked_since_restart} -gt ${bases_per_restart} ]; then
+  let "bases_checked_since_restart = 0"
   let "start = 0"
-  let "bases_left_since_restart = 0"
-  rm /tmp/prp_base_checked
+  rm "/tmp/prp/*"
+# elif [ ${bases_checked_since_restart} -gt ${bases_checked_before_page} ]; then
 else
   let "start += ${perpage}"
 fi
+let "bases_checked_before_page = ${bases_checked_since_restart}"
 done
 
