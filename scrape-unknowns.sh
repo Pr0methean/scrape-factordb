@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 let "start = 0"
-let "perpage = 48"
+let "perpage = 63"
 let "pertask = 3"
 let "min_delay = 1"
 let "max_delay = 45"
@@ -57,7 +57,7 @@ grep -q 'Assigned' <<< $all_results
         sleep $(($delay - 1))
       fi
     fi
-if [ $valid -ge 3 ]; then
+if [ $valid -ge 2 ]; then
   let "start = 0"
   let "valid = 0"
 elif [ ${search_succeeded} -eq 0 -a ${start} -gt 0 ]; then
