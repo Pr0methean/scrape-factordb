@@ -2,9 +2,9 @@
 set -u
 fifo_id="/tmp/$(uuidgen)"
 mkfifo "${fifo_id}"
-let "job = 99999999"
-while [ $job -ge "16666650" ]; do # Select random point in the 13*37*1050 cycle
-  let "job = $(openssl rand 3 | od -DAn)"
+let "job = 9999999999"
+while [ $job -ge "4294695561" ]; do # Select random point in the 13*37*1641 cycle
+  let "job = $(openssl rand 4 | od -DAn)"
 done
 let "id = 1"
 while [ ! -f "${fifo_id}" ]; do
