@@ -16,11 +16,11 @@ all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-c
   | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
 echo "$all_results"
 assigned=$(grep -c 'Assigned' <<< $all_results)
+please_waits=$(grep -c 'Please wait' <<< $all_results)
 if [ $assigned -gt 0 ]; then
   let "valid += 1"
 else
-  grep -q 'Please wait' <<< $all_results
-  if [ $? -eq 0 ]; then
+  if [ $please_waits -gt 0 ]; then
     echo "No assignments made; waiting 5 seconds before retrying"
     sleep 5
   fi
@@ -29,7 +29,7 @@ if [ $valid -ge 2 ]; then
   let "start = 0"
   let "valid = 0"
 else
-  let "start += $perpage"
+  let "start += $perpage - $please_waits"
 fi
 if [ $assigned -ge $(($perpage - 1)) ]; then
   let "perpage += 3"
