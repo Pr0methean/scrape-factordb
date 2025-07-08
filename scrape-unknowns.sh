@@ -2,7 +2,6 @@
 set -u
 let "start = 0"
 let "perpage = 27"
-let "pertask = 3"
 let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
@@ -14,7 +13,7 @@ all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-c
   | tac \
   | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_' \
   | paste -d ' ' - - - \
-  | sem --fg --id 'factordb-curl' -j 4 xargs -n 1 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- \
+  | sem --fg --id 'factordb-curl' -j 4 xargs wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- \
   | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
 echo "$all_results"
 assigned=$(grep -c 'Assigned' <<< $all_results)
