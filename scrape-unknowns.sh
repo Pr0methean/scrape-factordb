@@ -12,13 +12,18 @@ all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-c
   | uniq \
   | tac \
   | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_' \
-  | paste -d ' ' - - - \
-  | sem --fg --id 'factordb-curl' -j 4 xargs wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- \
+  | sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- \
   | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
 echo "$all_results"
 assigned=$(grep -c 'Assigned' <<< $all_results)
 if [ $assigned -gt 0 ]; then
   let "valid += 1"
+else
+  grep -q 'Please wait' <<< $all_results
+  if [ $? -eq 0 ]; then
+    echo "No assignments made; waiting 5 seconds before retrying"
+    sleep 5
+  fi
 fi
 if [ $valid -ge 2 ]; then
   let "start = 0"
