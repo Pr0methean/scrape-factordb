@@ -27,7 +27,7 @@ if [ $valid -ge 2 ]; then
 else
   let "start += $perpage"
 fi
-let "perpage = (($assigned + 2) * 2 / 3) * 3"
+let "perpage = (($assigned * 2 + 2) / 3) * 3"
 if [ $perpage -lt 3 ]; then
   let "perpage = 3"
 elif [ $perpage -gt 63 ]; then
