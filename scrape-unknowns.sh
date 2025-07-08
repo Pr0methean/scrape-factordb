@@ -2,7 +2,7 @@
 set -u
 let "start = 0"
 let "perpage = 6"
-let "total_assigned = 0"
+let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
@@ -16,22 +16,22 @@ all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-c
   | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
 echo "$all_results"
 assigned=$(grep -c 'Assigned' <<< $all_results)
-let "total_assigned += $assigned"
-if [ $assigned -eq 0 ]; then
+if [ $assigned -gt 0 ]; then
+  let "valid += 1"
+else
   grep -q 'Please wait' <<< $all_results
   if [ $? -eq 0 ]; then
     echo "No assignments made; waiting 5 seconds before retrying"
     sleep 5
   fi
 fi
-if [ $start -gt 0 -a $total_assigned -gt 3 ]; then
+if [ $valid -ge 2 ]; then
   let "start = 0"
-  let "perpage = (($total_assigned + 4) / 3) * 3"
-  let "total_assigned = 0"
+  let "valid = 0"
 else
   let "start += $perpage"
-  let "perpage = (($assigned + 4) / 3) * 3"
 fi
+let "perpage = (($assigned + 4) / 3) * 3"
 if [ $start -eq 0 -a $perpage -lt 6 ]; then
   let "perpage = 6"
 elif [ $perpage -lt 3 ]; then
