@@ -6,6 +6,7 @@ let "start = 0"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "bases_checked_before_page = 0"
 let "bases_per_restart = 254 * $perpage * 5"
+let "children = 0"
 while true; do
 url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
@@ -44,8 +45,13 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
     fi
   done
   ) &
+  let "children += 1"
 done
-wait
+while [ $children -ge $perpage ]; do
+  wait -n
+  let "children -= 1"
+  echo "${children} PRPs still being checked"
+done
 
 # Restart once we have found enough PRP checks that weren't already done
 let "bases_checked_since_restart = $(find '/tmp/prp' -type f -printf '.' | wc -m)"
