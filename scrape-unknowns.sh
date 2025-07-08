@@ -17,8 +17,8 @@ all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-c
   | sem --fg --id 'factordb-curl' -j 4 xargs -n 1 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- \
   | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
 echo "$all_results"
-grep -q 'Assigned' <<< $all_results
-if [ $? -eq 0 ]; then
+assigned=$(grep -c 'Assigned' <<< $all_results)
+if [ $assigned -gt 0 ]; then
   let "valid += 1"
 fi
 if [ $valid -ge 2 ]; then
@@ -26,5 +26,11 @@ if [ $valid -ge 2 ]; then
   let "valid = 0"
 else
   let "start += $perpage"
+fi
+let "perpage = (($assigned + 2) * 2 / 3) * 3"
+if [ $perpage -lt 3 ]; then
+  let "perpage = 3"
+elif [ $perpage -gt 63 ]; then
+  let "perpage = 63"
 fi
 done
