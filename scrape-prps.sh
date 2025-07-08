@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 mkdir "/tmp/prp"
-rm "/tmp/prp/*"
+rm /tmp/prp/*
 let "start = 0"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "bases_checked_before_page = 0"
@@ -51,9 +51,10 @@ wait
 # Restart once we have found enough PRP checks that weren't already done
 let "bases_checked_since_restart = $(find '/tmp/prp' -type f -printf '.' | wc -m)"
 if [ $start -gt 0 -a ${bases_checked_since_restart} -gt ${bases_per_restart} ]; then
+  echo "${bases_checked_since_restart} bases checked; restarting"
   let "bases_checked_since_restart = 0"
   let "start = 0"
-  rm "/tmp/prp/*"
+  rm /tmp/prp/*
 else
   let "start += ${perpage}"
 fi
