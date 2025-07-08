@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 let "start = 0"
-let "perpage = 9"
+let "perpage = 6"
 let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
@@ -32,8 +32,8 @@ else
   let "start += $perpage"
 fi
 let "perpage = (($assigned + 4) / 3) * 3"
-if [ $start -eq 0 -a $perpage -lt 9 ]; then
-  let "perpage = 9"
+if [ $start -eq 0 -a $perpage -lt 6 ]; then
+  let "perpage = 6"
 elif [ $perpage -lt 3 ]; then
   let "perpage = 3"
 elif [ $perpage -gt 63 ]; then
