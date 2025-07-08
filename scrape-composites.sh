@@ -15,10 +15,12 @@ let "hour_ns = 60 * ${minute_ns}"
         let "day_start = (${now} / (24 * ${hour_ns})) * (24 * ${hour_ns})"
         let "now_ns_of_day = ${now} - ${day_start}"
         let "now_hour_of_day = ${now_ns_of_day} / ${hour_ns}"
-        if [ ${now_hour_of_day} -lt 16 -a ${now_hour_of_day} -ge 2 ]; then
-          # when starting between 02:00 and 16:00 UTC (18:00 and 08:00 PST), softmax extends until 16:00 UTC
-          let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day}"
-          let "digits = 89 + (($job * 5) % 13)" # Range of 89-101 digits at night
+        if [ ${now_hour_of_day} -lt 15 -a ${now_hour_of_day} -ge 2 ]; then
+          # when starting between 02:00 and 15:00 UTC (18:00 and 07:00 PST), softmax extends until 15:00 UTC
+          let "min_softmax_ns = 15 * ${hour_ns} - ${now_ns_of_day}"
+          # range of 90..102 when starting between 02:00 and 04:00 UTC
+          # decreasing to 84..96 when starting between 14:00 and 15:00 UTC
+          let "digits = 91 - (${now_hour_of_day} / 2) + (($job * 5) % 13)"
           let "softmax_ns = (150 - ${digits}) * ${minute_ns}"
           if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
             let "softmax_ns = ${min_softmax_ns}"
