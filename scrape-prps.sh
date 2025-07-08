@@ -19,12 +19,11 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
 #  let "delay = ($actual_digits * $actual_digits) / 1000000"
 #  echo "PRP with ID ${id} is ${actual_digits} digits; will wait ${delay} s between requests."
   bases_checked_html=$(grep -A1 'Bases checked' <<< "$status")
-  echo "$bases_checked_html"
   bases_checked_lines=$(grep -o '[0-9]\+' <<< "$bases_checked_html")
-  # echo "Bases already checked: ${bases_checked_lines}"
   bases=({2..255})
   declare -a bases_left
   readarray -t bases_left < <(echo "${bases[@]} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
+  echo "${id}: Bases left to check: ${bases_left[@]}"
   for base in "${bases_left[@]}"; do
     touch /tmp/prp/id_${id}_base_${base}
     url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
