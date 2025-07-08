@@ -50,10 +50,13 @@ let "hour_ns = 60 * ${minute_ns}"
         if [ $? -eq 0 ]; then
           count=$(wc -l <<< "$not_trial_factored")
           first=$(head -n 1 <<< "$not_trial_factored")
-          echo "${id}: Found ${count} composites of ${digits} or more digits with undetected factors of 2 or 5! First is:"
-          echo "${id}: ${first}"
-          echo "${id}: Skipping to wait for trial factoring to catch up..."
-          # sleep $(bc -l <<< "0.003 * $digits * $digits")
+          echo "${id}: Found ${count} composites of ${digits} or more digits with undetected factors of 2 or 5!"
+          even=$(grep '[02468]$' <<< "$not_trial_factored")
+          output=$(xargs -n 1 -i '{}' curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number={}&factor=2" <<< ${even})
+          echo $output
+          mul5=$(grep '[05]$' <<< "$not_trial_factored")
+          output=$(xargs -n 1 -i '{}' curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number={}&factor=5" <<< ${mul5})
+          echo $output
           exit 0
         fi
         declare exact_size_results
