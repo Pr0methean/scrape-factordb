@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 let "start = 0"
-let "perpage = 63"
+let "perpage = 27"
 let "pertask = 3"
 let "valid = 0"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
