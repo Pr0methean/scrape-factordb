@@ -28,7 +28,7 @@ if [ $please_waits -gt 0 ]; then
   fi
 fi
 let "total_assigned += $assigned"
-if [ $start -gt 0 -a $total_assigned -ge 4 ]; then
+if [ $start -gt 0 ]; then
   let "start = 0"
   let "total_assigned = 0"
 elif [ $assigned -gt 0 ]; then
@@ -39,14 +39,22 @@ else
     let "start += $perpage - $please_waits"
   fi
 fi
-if [ $assigned -ge $(($perpage - 1)) ]; then
-  let "perpage += 3"
-else
+if [ $assigned -ge $(($perpage - 1)) -a $perpage -ge 3 ]; then
   let "perpage = (($assigned + 2) / 3) * 3"
+elif [ $assigned -gt 0 ]; then
   if [ $perpage -lt 3 ]; then
     let "perpage = 3"
-  elif [ $perpage -gt 63 ]; then
-    let "perpage = 63"
+  else
+    let "perpage = $assigned + 2"
+    if [ $perpage -gt 63 ]; then
+      let "perpage = 63"
+    else
+      let "perpage = ($perpage / 3) * 3"
+    fi
   fi
+elif [ $perpage -le 3 ]; then
+  let "perpage = 1"
+else
+  let "perpage = 3"
 fi
 done
