@@ -46,23 +46,6 @@ let "hour_ns = 60 * ${minute_ns}"
         # duplicate our work.
         url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=${stimulate}&start=${start}&download=1"
         results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
-        even=$(grep '[02468]$' <<< "$results")
-        any_even=$?
-        mul5=$(grep '[05]$' <<< "$results")
-        any_mul5=$?
-        if [ $any_even ]; then
-          echo "${id}: Found undetected even numbers: ${even}"
-          output=$(sem --id 'factordb-curl' --fg -j 4 xargs -i '{}' curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number={}&factor=2" <<< ${even})
-          echo $output
-        fi
-        if [ $any_mul5 ]; then
-          echo "${id}: Found undetected multiples of 5: ${mul5}"
-          output=$(sem --id 'factordb-curl' --fg -j 4 xargs -i '{}' curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number={}&factor=5" <<< ${mul5})
-          echo $output
-        fi
-        if [ $any_even -o $any_mul5 ]; then
-          exit 0
-        fi
         declare exact_size_results
         if [ $digits -ge 89 ]; then
           # Assume exact size, since there are so many numbers in these sizes
