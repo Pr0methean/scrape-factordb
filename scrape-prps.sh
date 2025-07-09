@@ -1,6 +1,7 @@
 #!/bin/bash
 set -u
 mkdir "/tmp/prp"
+mkdir "/tmp/prp-lock"
 rm /tmp/prp/*
 let "start = 0"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
@@ -14,6 +15,12 @@ results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check
 for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   | uniq); do
   (
+  exec 9>/tmp/prp-lock/${id}
+  flock -xn 9
+  if [ ! $? ]; then
+    echo "ID ${id} already locked by another process"
+    exit 0
+  fi
   echo "Checking ID ${id}"
   status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "https://factordb.com/${id}\&open=prime\&ct=Proof")
 #  actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
