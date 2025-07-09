@@ -18,15 +18,16 @@ all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-c
 echo "$all_results"
 assigned=$(grep -c 'Assigned' <<< $all_results)
 please_waits=$(grep -c 'Please wait' <<< $all_results)
-if [ $assigned -eq 0 -a $please_waits -gt 0 ]; then
-  echo "No assignments made; waiting 10 seconds before retrying"
-  sleep 10
-elif [ $please_waits -gt $assigned ]; then
-  echo "Too few assignments made; waiting 5 seconds before retrying"
-  sleep 5
-else
-  let "total_assigned += $assigned"
+if [ $please_waits -gt 0 ]; then
+  if [ $assigned -eq 0 ]; then
+    echo "No assignments made; waiting 10 seconds before retrying"
+    sleep 10
+  elif [ $please_waits -ge $assigned ]; then
+    echo "Too few assignments made; waiting 5 seconds before retrying"
+    sleep 5
+  fi
 fi
+let "total_assigned += $assigned"
 if [ $start -gt 0 -a $total_assigned -ge 6 ]; then
   let "start = 0"
   let "total_assigned = 0"
