@@ -45,7 +45,7 @@ let "hour_ns = 60 * ${minute_ns}"
         # Don't choose ones ending in 0,2,4,5,6,8, because those are still being trial-factored which may
         # duplicate our work.
         url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=${stimulate}&start=${start}&download=1"
-        results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
+        results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-all-errors -O- <<< "$url")
         not_trial_factored=$(grep '[024568]$' <<< "$results")
         if [ $? -eq 0 ]; then
           count=$(wc -l <<< "$not_trial_factored")
