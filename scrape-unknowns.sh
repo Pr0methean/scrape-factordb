@@ -21,7 +21,7 @@ please_waits=$(grep -c 'Please wait' <<< $all_results)
 if [ $assigned -eq 0 -a $please_waits -gt 0 ]; then
   echo "No assignments made; waiting 5 seconds before retrying"
   sleep 5
-elif [ $assigned -lt 3 -a $please_waits -ge 3 ]; then
+elif [ $please_waits -gt $assigned ]; then
   echo "Too few assignments made; waiting 2.5 seconds before retrying"
   sleep 2.5
 else
