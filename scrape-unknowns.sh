@@ -27,7 +27,7 @@ if [ $start -gt 0 -a $total_assigned -ge 6 ]; then
   let "start = 0"
   let "total_assigned = 0"
 else
-  let "start += $assigned - $please_waits"
+  let "start += $perpage - $please_waits"
 fi
 if [ $assigned -ge $(($perpage - 1)) ]; then
   let "perpage += 3"
