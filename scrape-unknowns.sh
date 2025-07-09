@@ -28,21 +28,10 @@ if [ $please_waits -gt 0 ]; then
   fi
 fi
 let "total_assigned += $assigned"
-if [ $start -gt 0 ]; then
-  let "start = 0"
-  let "total_assigned = 0"
-elif [ $assigned -gt 0 ]; then
-  let "start += $perpage - $please_waits"
-else
-  already_queued=$(grep -c 'queue' <<< $all_results)
-  if [ $already_queued -gt 0 ]; then
-    let "start += $perpage - $please_waits"
-  fi
-fi
 if [ $assigned -ge $(($perpage - 1)) -a $perpage -ge 3 ]; then
   let "perpage = (($assigned + 2) / 3) * 3"
 elif [ $assigned -gt 0 ]; then
-  if [ $perpage -lt 3 ]; then
+  if [ $perpage -lt 3 -a $start -gt 0 ]; then
     let "perpage += 1"
   else
     let "perpage = $assigned + 2"
@@ -56,5 +45,16 @@ elif [ $perpage -gt 3 ]; then
   let "perpage = 3"
 else
   let "perpage = 1"
+fi
+if [ $start -gt 0 ]; then
+  let "start = 0"
+  let "total_assigned = 0"
+elif [ $assigned -gt 0 ]; then
+  let "start += $perpage - $please_waits"
+else
+  already_queued=$(grep -c 'queue' <<< $all_results)
+  if [ $already_queued -gt 0 ]; then
+    let "start += $perpage - $please_waits"
+  fi
 fi
 done
