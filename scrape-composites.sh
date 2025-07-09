@@ -15,8 +15,8 @@ let "hour_ns = 60 * ${minute_ns}"
         let "day_start = (${now} / (24 * ${hour_ns})) * (24 * ${hour_ns})"
         let "now_ns_of_day = ${now} - ${day_start}"
         let "now_hour_of_day = ${now_ns_of_day} / ${hour_ns}"
-        if [ ${now_hour_of_day} -lt 15 -a ${now_hour_of_day} -ge 2 ]; then
-          # range of 92..102 when starting between 02:00 and 03:00 UTC
+        if [ ${now_hour_of_day} -lt 15 -a ${now_hour_of_day} -ge 1 ]; then
+          # range of 92..102 when starting between 01:00 and 03:00 UTC
           # decreasing to 88..98 when starting between 12:00 and 15:00 UTC
           let "digits = 103 - (${now_hour_of_day} / 3) - ($job % 11)"
           # when starting between 02:00 and 15:00 UTC (18:00 and 07:00 PST), softmax extends until 16:00 UTC
