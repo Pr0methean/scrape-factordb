@@ -8,6 +8,7 @@ while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
 echo "$(date -Iseconds): searching ${url}"
 all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate --retry-connrefused --retry-on-http-error=502 -T 30 -t 3 -q -O- -- "${url}" \
+  | grep '#BB0000' \
   | grep -o 'index.php?id=[0-9]\+' \
   | uniq \
   | tac \
