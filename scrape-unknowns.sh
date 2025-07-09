@@ -28,7 +28,7 @@ if [ $please_waits -gt 0 ]; then
   fi
 fi
 let "total_assigned += $assigned"
-if [ $start -gt 0 -a $total_assigned -ge 6 ]; then
+if [ $start -gt 0 -a $total_assigned -ge 4 ]; then
   let "start = 0"
   let "total_assigned = 0"
 else
