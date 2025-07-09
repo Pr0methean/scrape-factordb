@@ -29,8 +29,9 @@ if [ $please_waits -gt 0 ]; then
 fi
 let "total_assigned += $assigned"
 let "old_start = $start"
+let "old_perpage = $perpage"
 if [ $assigned -gt 0 ]; then
-  if [ $start -gt 0 ]; then
+  if [ $old_start -gt 0 -a $total_assigned -ge 2 ]; then
     let "start = 0"
     let "total_assigned = 0"
   else
@@ -59,8 +60,10 @@ elif [ $perpage -gt 3 ]; then
   let "perpage = 3"
 else
   let "perpage = 1"
-  if [ $old_start -gt 0 ]; then
+  if [ $old_start -ge 100000 ]; then
     let "start = 0"
+  elif [ $old_perpage -eq 1 ]; then
+    let "start += 1"
   fi
 fi
 done
