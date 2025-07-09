@@ -31,8 +31,13 @@ let "total_assigned += $assigned"
 if [ $start -gt 0 -a $total_assigned -ge 4 ]; then
   let "start = 0"
   let "total_assigned = 0"
-else
+elif [ $assigned -gt 0 ]; then
   let "start += $perpage - $please_waits"
+else
+  already_queued=$(grep -c 'queue' <<< $all_results)
+  if [ $already_queued -gt 0 ]; then
+    let "start += $perpage - $please_waits"
+  fi
 fi
 if [ $assigned -ge $(($perpage - 1)) ]; then
   let "perpage += 3"
