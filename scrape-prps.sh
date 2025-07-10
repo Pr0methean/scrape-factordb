@@ -34,6 +34,8 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   echo "${id}: Bases left to check: ${bases_left[@]}"
   for base in "${bases_left[@]}"; do
     touch /tmp/prp/id_${id}_base_${base}
+  done
+  for base in "${bases_left[@]}"; do
     url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
     output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
     if [ $? -eq 0 ]; then
