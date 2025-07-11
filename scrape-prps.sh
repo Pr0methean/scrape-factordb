@@ -5,8 +5,7 @@ mkdir "/tmp/prp-lock"
 rm /tmp/prp/*
 let "start = 0"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
-let "bases_checked_before_page = 0"
-let "bases_per_restart = 254 * $perpage * 5"
+let "ids_per_restart = $perpage * 2"
 let "children = 0"
 while true; do
 url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
@@ -32,9 +31,9 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   declare -a bases_left
   readarray -t bases_left < <(echo "${bases[@]} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
   echo "${id}: Bases left to check: ${bases_left[@]}"
-  for base in "${bases_left[@]}"; do
-    touch /tmp/prp/id_${id}_base_${base}
-  done
+  if [ "${#bases_left[@]}" -gt 0 ]; then
+    touch /tmp/prp/${id}
+  fi
   for base in "${bases_left[@]}"; do
     url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
     output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
@@ -63,15 +62,14 @@ while [ $children -ge $perpage ]; do
 done
 
 # Restart once we have found enough PRP checks that weren't already done
-let "bases_checked_since_restart = $(find '/tmp/prp' -type f -printf '.' | wc -m)"
-if [ $start -gt 0 -a ${bases_checked_since_restart} -gt ${bases_per_restart} ]; then
-  echo "${bases_checked_since_restart} bases checked; restarting"
-  let "bases_checked_since_restart = 0"
+let "ids_checked_since_restart = $(find '/tmp/prp' -type f -printf '.' | wc -m)"
+if [ $start -gt 0 -a ${ids_checked_since_restart} -gt ${ids_per_restart} ]; then
+  echo "${ids_checked_since_restart} IDs checked; restarting"
+  let "ids_checked_since_restart = 0"
   let "start = 0"
   rm /tmp/prp/*
 else
   let "start += ${perpage}"
 fi
-let "bases_checked_before_page = ${bases_checked_since_restart}"
 done
 
