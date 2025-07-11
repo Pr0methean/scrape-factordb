@@ -6,6 +6,8 @@ set key autotitle columnheader
 set style data lines
 set datafile separator ','
 set terminal wxt enhanced size 1800,1080
+set decimal locale
+set format y "%'.0f"
 set grid xtics ytics
 # set yrange [7.03e8:*]
 f(x) = b - a*x

@@ -2,6 +2,9 @@
 set xdata time
 set timefmt "%Y-%m-%dT%H:%M:%S%z"
 set format x "%m-%d %H:%M"
+set grid xtics ytics
+set decimal locale
+set format y "%'.0f"
 set key autotitle columnheader
 set style data lines
 set datafile separator ','
