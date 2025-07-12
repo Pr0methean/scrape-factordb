@@ -21,7 +21,7 @@ let "hour_ns = 60 * ${minute_ns}"
           let "digits = 106 - (${now_hour_of_day} / 2) - ($job % 11)"
           # when starting between 02:00 and 15:00 UTC (18:00 and 07:00 PST), softmax extends until 16:00 UTC
           # but is still adjusted downward based on digit size
-          let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day} - ${digits} * ${digits} * 2000 * 1000 * 1000"
+          let "min_softmax_ns = 16 * ${hour_ns} - ${now_ns_of_day} - ${digits} * ${digits} * 1000 * 1000 * 1000"
           let "softmax_ns = (130 - ${digits}) * ${minute_ns}"
           if [ ${softmax_ns} -lt ${min_softmax_ns} ]; then
             let "softmax_ns = ${min_softmax_ns}"
