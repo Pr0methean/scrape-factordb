@@ -23,14 +23,14 @@ if [ $please_waits -gt 0 ]; then
     echo "No assignments made; waiting 10 seconds before retrying"
     sleep 10
   elif [ $please_waits -ge $assigned ]; then
-    echo "Too few assignments made; waiting 8 seconds before retrying"
-    sleep 8
-  else
-    echo "'Please wait' received; waiting 6 seconds before retrying"
+    echo "Too few assignments made; waiting 6 seconds before retrying"
     sleep 6
+  else
+    echo "'Please wait' received; waiting 4 seconds before retrying"
+    sleep 4
   fi
 else
-  sleep 3
+  sleep 2
 fi
 let "total_assigned += $assigned"
 let "old_start = $start"
