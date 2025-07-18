@@ -23,8 +23,8 @@ if [ $please_waits -gt 0 ]; then
     echo "No assignments made; waiting 10 seconds before retrying"
     sleep 10
   elif [ $please_waits -ge $assigned ]; then
-    echo "Too few assignments made; waiting 6 seconds before retrying"
-    sleep 6
+    echo "Too few assignments made; waiting 7 seconds before retrying"
+    sleep 7
   else
     echo "'Please wait' received; waiting 4 seconds before retrying"
     sleep 4
