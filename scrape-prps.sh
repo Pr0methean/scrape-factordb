@@ -3,7 +3,8 @@ set -u
 mkdir "/tmp/prp"
 mkdir "/tmp/prp-lock"
 rm /tmp/prp/*
-let "start = 0"
+let "min_start = 0"
+let "start = ${min_start}"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "ids_per_restart = $perpage * 2"
 let "children = 0"
@@ -31,6 +32,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   declare -a bases_left
   readarray -t bases_left < <(echo "${bases[@]} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
   echo "${id}: Bases left to check: ${bases_left[@]}"
+  let "stopped_early = 0"
   for base in "${bases_left[@]}"; do
     url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
     output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
@@ -38,18 +40,24 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
       if grep -q 'set to C' <<< "$output"; then
         echo "${id}: No longer PRP (ruled out by PRP check)"
         touch /tmp/prp/${id}
+        let "stopped_early = 1"
         break
       elif grep -q '\(Verified\|Processing\)' <<< "$output"; then
         echo "${id}: No longer PRP (certificate received)"
+        let "stopped_early = 1"
         break
       elif ! grep -q 'PRP' <<< "$output"; then
         echo "${id}: No longer PRP (ruled out by factor or N-1/N+1 check)"
+        let "stopped_early = 1"
         break
       else
         touch /tmp/prp/${id}
       fi
     fi
   done
+  if [ ! $stopped_early ]; then
+    echo "${id}: All bases checked"
+  fi
   ) &
   let "children += 1"
 done
@@ -64,7 +72,7 @@ let "ids_checked_since_restart = $(find '/tmp/prp' -type f -printf '.' | wc -m)"
 if [ $start -gt 0 -a ${ids_checked_since_restart} -gt ${ids_per_restart} ]; then
   echo "${ids_checked_since_restart} IDs checked; restarting"
   let "ids_checked_since_restart = 0"
-  let "start = 0"
+  let "start = ${min_start}"
   rm /tmp/prp/*
 else
   let "start += ${perpage}"
