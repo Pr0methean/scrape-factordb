@@ -37,8 +37,8 @@ let "old_start = $start"
 let "old_perpage = $perpage"
 already_queued=$(grep -c 'queue' <<< $all_results)
 let "advance = $already_queued + $assigned"
-if [ $assigned -ge $(($perpage - 1)) -a $perpage -ge 3 ]; then
-  let "perpage = (($assigned + 2) / 3) * 3"
+if [ $assigned -ge $(($perpage - 1)) ]; then
+  let "perpage = (($assigned + 4) / 3) * 3"
 elif [ $assigned -gt 0 ]; then
     let "perpage = $assigned + 2"
     if [ $perpage -gt 63 ]; then
