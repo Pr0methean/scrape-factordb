@@ -34,21 +34,8 @@ else
 fi
 let "total_assigned += $assigned"
 let "old_start = $start"
-let "old_perpage = $perpage"
 already_queued=$(grep -c 'queue' <<< $all_results)
 let "advance = $already_queued + $assigned"
-if [ $assigned -ge $(($perpage - 1)) ]; then
-  let "perpage = (($assigned + 4) / 3) * 3"
-elif [ $assigned -gt 0 ]; then
-    let "perpage = $assigned + 2"
-    if [ $perpage -gt 63 ]; then
-      let "perpage = 63"
-    else
-      let "perpage = ($perpage / 3) * 3"
-    fi
-else
-  let "perpage = 3"
-fi
 if [ $old_start -gt 0 -a $total_assigned -ge 12 ]; then
   let "start = 0"
   let "total_assigned = 0"
