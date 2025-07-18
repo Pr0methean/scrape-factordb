@@ -6,7 +6,7 @@ rm /tmp/prp/*
 let "min_start = 0"
 let "start = ${min_start}"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
-let "ids_per_restart = $perpage * 2"
+let "min_ids_per_restart = $perpage + 3"
 let "children = 0"
 while true; do
 url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
@@ -68,7 +68,7 @@ done
 
 # Restart once we have found enough PRP checks that weren't already done
 let "ids_checked_since_restart = $(find '/tmp/prp' -type f -printf '.' | wc -m)"
-if [ $start -gt 0 -a ${ids_checked_since_restart} -gt ${ids_per_restart} ]; then
+if [ ${ids_checked_since_restart} -ge ${min_ids_per_restart} -a $((${ids_checked_since_restart} * 2)) -ge $((${start} - ${min_start})) ]; then
   echo "${ids_checked_since_restart} IDs checked; restarting"
   let "ids_checked_since_restart = 0"
   let "start = ${min_start}"
