@@ -32,6 +32,6 @@ while true; do
     fi
   ) &
   next_row_proc=$!
-  sleep 119.5
+  sleep 59.5
   wait $next_row_proc
 done
