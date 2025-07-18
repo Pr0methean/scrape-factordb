@@ -41,7 +41,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
       if grep -q 'set to C' <<< "$output"; then
         echo "${id}: Check ruled out PRP"
         break
-      elif grep -q 'Verified' <<< "$output"; then
+      elif grep -q '\(Verified\|Processing\)' <<< "$output"; then
         echo "${id}: No longer PRP"
         break
       elif ! grep -q 'PRP' <<< "$output"; then
