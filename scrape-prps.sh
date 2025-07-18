@@ -55,7 +55,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
       fi
     fi
   done
-  if [ ! $stopped_early ]; then
+  if [ $stopped_early -eq 0 ]; then
     echo "${id}: All bases checked"
   fi
   ) &
