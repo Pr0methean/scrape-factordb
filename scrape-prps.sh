@@ -39,13 +39,13 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
     output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
     if [ $? -eq 0 ]; then
       if grep -q 'set to C' <<< "$output"; then
-        echo "${id}: Check ruled out PRP"
+        echo "${id}: No longer PRP (ruled out by PRP check)"
         break
       elif grep -q '\(Verified\|Processing\)' <<< "$output"; then
-        echo "${id}: No longer PRP"
+        echo "${id}: No longer PRP (certificate received)"
         break
       elif ! grep -q 'PRP' <<< "$output"; then
-        echo "${id}: No longer PRP"
+        echo "${id}: No longer PRP (ruled out by factor or N-1/N+1 check)"
         break
 #      else
 #        sleep ${delay}
