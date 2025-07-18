@@ -28,9 +28,8 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
 #  echo "PRP with ID ${id} is ${actual_digits} digits; will wait ${delay} s between requests."
   bases_checked_html=$(grep -A1 'Bases checked' <<< "$status")
   bases_checked_lines=$(grep -o '[0-9]\+' <<< "$bases_checked_html")
-  bases=({2..255})
   declare -a bases_left
-  readarray -t bases_left < <(echo "${bases[@]} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
+  readarray -t bases_left < <(echo "{2..255} ${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
   echo "${id}: Bases left to check: ${bases_left[@]}"
   let "stopped_early = 0"
   for base in "${bases_left[@]}"; do
