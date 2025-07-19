@@ -42,37 +42,35 @@ while true; do
     smallest_c_cell=$(get_row "${results}" 6 3)
     smallest_c=$(sed 's_digits.*__' <<< "${smallest_c_cell}")
     load=$(get_row "${results}" 20 2)
+    let "start_prp = 0"
     if [ "${u}" != "" ]; then
       echo "\"${time}\",${p},${prp},${cf},${c},${u},${smallest_prp},${smallest_c},${load}" | tee -a stats.csv
       least_u_row=$(get_row "${results}" 6 4)
-      let "start_prp = 0"
       if [ "${least_u_row}" != "" ]; then
         least_u_id=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
           | grep -o '[0-9]\+')
+        let "start_prp = 1"
         if [ "$(try_assign_prp ${least_u_id} )" ]; then
           echo "Assigned PRP check: ${least_u_id}"
-          let "start_prp = -1"
+          sleep 10
         else
           echo "Smallest-unknown id ${least_u_id} is already scraped"
-          let "start_prp = 1"
         fi
       else
         echo "No smallest unknown-status number found!"
       fi
-      if [ "${start_prp}" -ge 0 ]; then
-          all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate --retry-connrefused \
-              --retry-on-http-error=502 -T 30 -t 3 -q -O- -o/dev/null -- "https://factordb.com/listtype.php?t=2\&mindig=2001\&start=${start_prp}\&perpage=3" \
-            | grep '#BB0000' \
-            | grep -o 'index.php?id=[0-9]\+' \
-            | uniq \
-            | tac \
-            | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_' \
-            | sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 \
-               --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- \
-            | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
-          echo "${all_results}"
-      fi
     fi
+    all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate --retry-connrefused \
+        --retry-on-http-error=502 -T 30 -t 3 -q -O- -o/dev/null -- "https://factordb.com/listtype.php?t=2\&mindig=2001\&start=${start_prp}\&perpage=3" \
+      | grep '#BB0000' \
+      | grep -o 'index.php?id=[0-9]\+' \
+      | uniq \
+      | tac \
+      | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_' \
+      | sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 \
+            --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- \
+      | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
+    echo "${all_results}"
   ) &
   next_row_proc=$!
   sleep 59.5
