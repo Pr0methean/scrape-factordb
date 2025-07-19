@@ -2,6 +2,8 @@
 set xdata time
 set timefmt "%Y-%m-%dT%H:%M:%S%z"
 set format x "%m-%d %H:%M"
+set format y "%.1b billion"
+set grid xtics ytics
 set key autotitle columnheader
 set style data lines
 set datafile separator ','
