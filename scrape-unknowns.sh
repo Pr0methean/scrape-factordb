@@ -13,6 +13,7 @@ urls=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certific
   | uniq \
   | tac \
   | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_')
+let "retries = 0"
 while true; do
 all_results=$(sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- <<< "${urls}" \
   | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
@@ -23,8 +24,13 @@ if [ $please_waits -gt 0 ]; then
   if [ $assigned -eq 0 ]; then
     already=$(grep -c '\(queue\|>C<\|>P<\|>PRP<\)' <<< $all_results)
     if [ $already -eq 0 ]; then
-      echo "$(date -Iseconds): No assignments made, and no results already assigned; waiting 10 seconds before retrying same search"
-      sleep 10
+      let "delay = 10 + 2 * $retries"
+      if [ $delay -gt 60 ]; then
+        let "delay = 60"
+      fi
+      echo "$(date -Iseconds): No assignments made, and no results already assigned; waiting $delay seconds before retrying same search"
+      sleep "$delay"
+      let "retries += 1"
     else
       echo "$(date -Iseconds): No assignments made, but some results already assigned; waiting 10 seconds before searching again"
       sleep 10
