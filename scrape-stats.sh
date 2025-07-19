@@ -13,9 +13,9 @@ try_assign_prp () {
   if [ ! -f "/tmp/factordb-scraped-unknowns/$1" ]; then
     assign_least_u="https://factordb.com/index.php?id=$1&prp=Assign+to+worker"
     echo $1
-    result=$(sem --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate -nv -O- -o/dev/null "${assign_least_u}" | grep '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\)')
-    echo "$1: $result"
-    if [ "${result}" != "" ]; then
+    result=$(sem --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate -nv -O- -o/dev/null "${assign_least_u}" | grep '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\|Please wait\)')
+    grep -q "Assigned" "${result}"
+    if [ "$?" ]; then
       touch "/tmp/factordb-scraped-unknowns/$1"
       return 0
     else
@@ -45,22 +45,23 @@ while true; do
     if [ "${u}" != "" ]; then
       echo "\"${time}\",${p},${prp},${cf},${c},${u},${smallest_prp},${smallest_c},${load}" | tee -a stats.csv
       least_u_row=$(get_row "${results}" 6 4)
-      let "prp_check_assigned = 0"
+      let "start_prp = 0"
       if [ "${least_u_row}" != "" ]; then
         least_u_id=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
           | grep -o '[0-9]\+')
         if [ "$(try_assign_prp ${least_u_id} )" ]; then
           echo "Assigned PRP check: ${least_u_id}"
-          let "prp_check_assigned = 1"
+          let "start_prp = -1"
         else
           echo "Smallest-unknown id ${least_u_id} is already scraped"
+          let "start_prp = 1"
         fi
       else
         echo "No smallest unknown-status number found!"
       fi
-      if [ "${prp_check_assigned}" -eq 0 ]; then
+      if [ "${start_prp}" -ge 0 ]; then
           all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate --retry-connrefused \
-              --retry-on-http-error=502 -T 30 -t 3 -q -O- -o/dev/null -- "https://factordb.com/listtype.php?t=2\&mindig=2001\&start=1\&perpage=3" \
+              --retry-on-http-error=502 -T 30 -t 3 -q -O- -o/dev/null -- "https://factordb.com/listtype.php?t=2\&mindig=2001\&start=${start_prp}\&perpage=3" \
             | grep '#BB0000' \
             | grep -o 'index.php?id=[0-9]\+' \
             | uniq \
