@@ -45,11 +45,20 @@ while true; do
     if [ "${u}" != "" ]; then
       echo "\"${time}\",${p},${prp},${cf},${c},${u},${smallest_prp},${smallest_c},${load}" | tee -a stats.csv
       least_u_row=$(get_row "${results}" 6 4)
+      let "prp_check_assigned = 0"
       if [ "${least_u_row}" != "" ]; then
         least_u_id=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
           | grep -o '[0-9]\+')
-        if [ ! "$(try_assign_prp ${least_u_id} )" ]; then
+        if [ "$(try_assign_prp ${least_u_id} )" ]; then
+          echo "Assigned PRP check: ${least_u_id}"
+          let "prp_check_assigned = 1"
+        else
           echo "Smallest-unknown id ${least_u_id} is already scraped"
+        fi
+      else
+        echo "No smallest unknown-status number found!"
+      fi
+      if [ "${prp_check_assigned}" -eq 0 ]; then
           all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate --retry-connrefused \
               --retry-on-http-error=502 -T 30 -t 3 -q -O- -o/dev/null -- "https://factordb.com/listtype.php?t=2\&mindig=2001\&start=1\&perpage=3" \
             | grep '#BB0000' \
@@ -57,13 +66,10 @@ while true; do
             | uniq \
             | tac \
             | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_' \
-            | sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-c
-onnrefused --retry-on-http-error=502 -O- \
+            | sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 \
+               --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- \
             | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
           echo "${all_results}"
-        else
-          echo "Assigned PRP check: ${least_u_id}"
-        fi
       fi
     fi
   ) &
