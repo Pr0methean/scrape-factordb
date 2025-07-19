@@ -50,14 +50,17 @@ while true; do
           | grep -o '[0-9]\+')
         if [ ! "$(try_assign_prp ${least_u_id} )" ]; then
           echo "Smallest-unknown id ${least_u_id} is already scraped"
-          assign_ids=$(sem --id 'factordb-curl' --ungroup --fg -j 4 wget -e robots=off --no-check-certificate -nv -O- -o /dev/null "https://factordb.com/listtype.php?t=2\&mindig=2001\&start=1\&perpage=3" \
-            | pup 'a[href*="index.php?id"] attr{href}' \
+          all_results=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate --retry-connrefused \
+              --retry-on-http-error=502 -T 30 -t 3 -q -O- -o/dev/null -- "https://factordb.com/listtype.php?t=2\&mindig=2001\&start=1\&perpage=3" \
+            | grep '#BB0000' \
+            | grep -o 'index.php?id=[0-9]\+' \
             | uniq \
             | tac \
-            | sed 's_.*id=__')
-          while read -r assign_id; do
-            try_assign_prp ${assign_id}
-          done <<< "${assign_ids}"
+            | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_' \
+            | sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-c
+onnrefused --retry-on-http-error=502 -O- \
+            | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
+          echo "${all_results}"
         else
           echo "Assigned PRP check: ${least_u_id}"
         fi
