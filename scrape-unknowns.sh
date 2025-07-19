@@ -26,7 +26,9 @@ if [ $please_waits -gt 0 ]; then
     if [ $already -eq 0 ]; then
       let "delay = 10 + 2 * $retries"
       if [ $delay -gt 60 ]; then
-        let "delay = 60"
+        echo "$(date -Iseconds): No assignments made, and no results already assigned; giving up on current search and waiting 60 seconds"
+        sleep 60
+        break
       fi
       echo "$(date -Iseconds): No assignments made, and no results already assigned; waiting $delay seconds before retrying same search"
       sleep "$delay"
