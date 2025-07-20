@@ -3,6 +3,7 @@ set -u
 let "start = 0"
 let "perpage = 3"
 let "total_assigned = 0"
+let "minute_ns = 60 * 1000 * 1000 * 1000"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
@@ -13,6 +14,7 @@ urls=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certific
   | uniq \
   | tac \
   | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_')
+let "urls_expiry = $(date +%s%N) + 15 * ${minute_ns}"
 let "retries = 0"
 while true; do
 all_results=$(sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- <<< "${urls}" \
@@ -24,10 +26,11 @@ if [ $please_waits -gt 0 ]; then
   if [ $assigned -eq 0 ]; then
     already=$(grep -c '\(queue\|>C<\|>P<\|>PRP<\)' <<< $all_results)
     if [ $already -eq 0 ]; then
-      let "delay = 10 + 2 * $retries"
-      if [ $delay -gt 60 ]; then
-        echo "$(date -Iseconds): No assignments made, and no results already assigned; giving up on current search and waiting 60 seconds"
-        sleep 60
+      let "delay = ${retries} * 2 + 10"
+      let "urls_time_remaining = ${urls_expiry} - $(date +%s%N) - ($delay * 1000 * 1000 * 1000)"
+      if [ $urls_time_remaining -lt 0 ]; then
+        echo "$(date -Iseconds): No assignments made, and no results already assigned; giving up on current search and waiting $delay seconds"
+        sleep "$delay"
         break
       fi
       echo "$(date -Iseconds): No assignments made, and no results already assigned; waiting $delay seconds before retrying same search"
