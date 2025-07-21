@@ -44,7 +44,7 @@ if [ $please_waits -gt 0 -a $assigned -lt 3 ]; then
     else
       let "delay += 3"
       if [ $delay -gt $max_delay ]; then
-        let "delay = 60"
+        let "delay = $max_delay"
       fi
     fi
     if [ $already -eq 0 ]; then
