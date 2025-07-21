@@ -1,7 +1,8 @@
 #!/bin/bash
 set -u
 let "start = 0"
-let "perpage = 3"
+let "perpage = 6"
+let "min_perpage = 6"
 let "max_perpage = 63"
 let "total_assigned = 0"
 let "minute_ns = 60 * 1000 * 1000 * 1000"
@@ -33,7 +34,7 @@ if [ $(($already + 2)) -ge $perpage ]; then
   else
     echo "Increased number of results per page to $perpage."
   fi
-elif [ $(($please_waits + 2)) -ge $perpage -a $perpage -gt 3 ]; then
+elif [ $(($please_waits + 2)) -ge $perpage -a $perpage -gt $min_perpage ]; then
   let "perpage -= 3"
   echo "Decreased number of results per page to $perpage."
 fi
