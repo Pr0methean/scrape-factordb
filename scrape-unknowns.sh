@@ -2,8 +2,12 @@
 set -u
 let "start = 0"
 let "perpage = 3"
+let "max_perpage = 63"
 let "total_assigned = 0"
 let "minute_ns = 60 * 1000 * 1000 * 1000"
+let "max_delay = 40"
+let "min_delay = 2"
+let "delay = 20"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
@@ -15,59 +19,95 @@ urls=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certific
   | tac \
   | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_')
 let "urls_expiry = $(date +%s%N) + 15 * ${minute_ns}"
-let "retries = 0"
 while true; do
 all_results=$(sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- <<< "${urls}" \
   | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
 echo "$all_results"
 assigned=$(grep -c 'Assigned' <<< $all_results)
 please_waits=$(grep -c 'Please wait' <<< $all_results)
-if [ $please_waits -gt 0 ]; then
+already=$(grep -c '\(queue\|>C<\|>P<\|>PRP<\)' <<< $all_results)
+if [ $(($already + 2)) -ge $perpage ]; then
+  let "perpage += 3"
+  if [ $perpage -gt $max_perpage ]; then
+    let "perpage = $max_perpage"
+  else
+    echo "Increased number of results per page to $perpage."
+  fi
+elif [ $(($please_waits + 2)) -ge $perpage -a $perpage -gt 3 ]; then
+  let "perpage -= 3"
+  echo "Decreased number of results per page to $perpage."
+fi
+if [ $please_waits -gt 0 -a $assigned -lt 3 ]; then
   if [ $assigned -eq 0 ]; then
-    already=$(grep -c '\(queue\|>C<\|>P<\|>PRP<\)' <<< $all_results)
-    if [ $already -eq 0 ]; then
-      let "delay = ${retries} * 3 + 10"
-      if [ $delay -gt 60 ]; then
+    if [ $delay -lt 10 ]; then
+      let "delay = 10"
+    else
+      let "delay += 3"
+      if [ $delay -gt $max_delay ]; then
         let "delay = 60"
       fi
+    fi
+    if [ $already -eq 0 ]; then
       let "urls_time_remaining = ${urls_expiry} - $(date +%s%N) - ($delay * 1000 * 1000 * 1000)"
       if [ $urls_time_remaining -lt 0 ]; then
-        echo "$(date -Iseconds): No assignments made, and no results already assigned; giving up on current search and waiting $delay seconds"
+        echo "$(date -Iseconds): No assignments made, and no results already assigned; giving up on current search and waiting $delay seconds for next search"
         sleep "$delay"
         break
       fi
       echo "$(date -Iseconds): No assignments made, and no results already assigned; waiting $delay seconds before retrying same search"
       sleep "$delay"
-      let "retries += 1"
     else
-      echo "$(date -Iseconds): No assignments made, but some results already assigned; waiting 10 seconds before searching again"
-      sleep 10
+      echo "$(date -Iseconds): No assignments made, but some results already assigned; waiting $delay seconds before next search"
+      sleep "$delay"
       break
     fi
   elif [ $please_waits -ge $assigned ]; then
-    echo "$(date -Iseconds): Too few assignments made; waiting 7 seconds before retrying"
-    sleep 7
+    if [ $delay -lt 7 ]; then
+      let "delay = 7"
+    else
+      let "delay += 2"
+      if [ $delay -gt $max_delay ]; then
+        let "delay = 60"
+      fi
+    fi
+    echo "$(date -Iseconds): Too few assignments made; waiting $delay seconds before next search"
+    sleep "$delay"
     break
   else
-    echo "$(date -Iseconds): 'Please wait' received; waiting 4 seconds before retrying"
-    sleep 4
+    if [ $delay -lt 4 ]; then
+      let "delay = 4"
+    fi
+    echo "$(date -Iseconds): 'Please wait' received; waiting $delay seconds before next search"
+    sleep "$delay"
     break
   fi
+elif [ $assigned -gt 0 ]; then
+  let "delay -= 5"
+  if [ $delay -lt $min_delay ]; then
+    let "delay = $min_delay"
+  fi
+  echo "$(date -Iseconds): Enough assignments made; waiting $delay seconds before next search"
+  sleep "$delay"
+  break
 else
-  sleep 2
+  # we got neither 'assigned' nor 'please wait' so our search wasn't helpful and we should do a bigger one now
   break
 fi
 done
 let "total_assigned += $assigned"
 let "old_start = $start"
-already_queued=$(grep -c 'queue' <<< $all_results)
-let "advance = $already_queued + $assigned"
+let "advance = $already + $assigned"
 if [ $old_start -gt 0 -a $total_assigned -ge 12 ]; then
   let "start = 0"
   let "total_assigned = 0"
+  let "delay -= (old_start / 3)"
+  if [ $delay -lt $min_delay ]; then
+    let "delay = $min_delay"
+  fi
 elif [ $(($old_start + $advance)) -gt 100000 ]; then
   let "start = 0"
   let "total_assigned = 0"
+  let "delay = $min_delay"
 else
   let "start += $advance"
 fi
