@@ -67,7 +67,7 @@ if [ $please_waits -gt 0 -a $assigned -lt 3 ]; then
     else
       let "delay += 2"
       if [ $delay -gt $max_delay ]; then
-        let "delay = 60"
+        let "delay = $max_delay"
       fi
     fi
     echo "$(date -Iseconds): Too few assignments made; waiting $delay seconds before next search"
