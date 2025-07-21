@@ -69,7 +69,7 @@ done
 # Restart once we have found enough PRP checks that weren't already done
 let "ids_with_prp_checks_since_restart = $(find '/tmp/prp' -type f -printf '.' | wc -m)"
 let "ids_checked_since_restart = ${start} + ${perpage} - ${min_start}"
-if [ ${ids_with_prp_checks_since_restart} -ge ${min_ids_per_restart} -a $((${ids_with_prp_checks_since_restart} * 2)) -ge ${ids_checked_since_restart} ]; then
+if [ ${ids_with_prp_checks_since_restart} -ge ${min_ids_per_restart} -a $((${ids_with_prp_checks_since_restart} * 4)) -ge ${ids_checked_since_restart} ]; then
   echo "${ids_with_prp_checks_since_restart} IDs checked in ${ids_checked_since_restart} tries; restarting"
   let "ids_checked_since_restart = 0"
   let "start = ${min_start}"
