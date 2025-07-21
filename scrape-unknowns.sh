@@ -40,7 +40,7 @@ elif [ $(($please_waits + 2)) -ge $perpage -a $perpage -gt $min_perpage ]; then
 fi
 if [ $please_waits -gt 0 -a $assigned -lt 3 ]; then
   if [ $assigned -eq 0 ]; then
-    if [ $delay -lt 10 ]; then
+    if [ $delay -le 7 ]; then
       let "delay = 10"
     else
       let "delay += 3"
@@ -63,10 +63,10 @@ if [ $please_waits -gt 0 -a $assigned -lt 3 ]; then
       break
     fi
   elif [ $please_waits -ge $assigned ]; then
-    if [ $delay -lt 7 ]; then
+    if [ $delay -le 6 ]; then
       let "delay = 7"
     else
-      let "delay += 2"
+      let "delay += 1"
       if [ $delay -gt $max_delay ]; then
         let "delay = $max_delay"
       fi
