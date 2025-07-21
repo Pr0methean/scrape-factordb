@@ -71,7 +71,7 @@ let "ids_with_prp_checks_since_restart = $(find '/tmp/prp' -type f -printf '.' |
 let "ids_checked_since_restart = ${start} + ${perpage} - ${min_start}"
 let "restart = 0"
 if [ ${ids_with_prp_checks_since_restart} -ge ${min_ids_per_restart} ]; then
-  if [ $((${ids_with_prp_checks_since_restart} * 4)) -ge ${ids_checked_since_restart} ]; then
+  if [ $((${ids_with_prp_checks_since_restart} * 3)) -ge ${ids_checked_since_restart} ]; then
     echo "${ids_with_prp_checks_since_restart} IDs checked in ${ids_checked_since_restart} tries; restarting due to sufficient percentage"
     let "restart = 1"
   elif [ ${ids_with_prp_checks_since_restart} -ge 30 ]; then
