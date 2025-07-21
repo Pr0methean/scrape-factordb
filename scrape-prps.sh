@@ -74,6 +74,11 @@ if [ ${ids_with_prp_checks_since_restart} -ge ${min_ids_per_restart} -a $((${ids
   let "ids_checked_since_restart = 0"
   let "start = ${min_start}"
   rm /tmp/prp/*
+elif [ $start -ge 100000 ]; then
+  echo "${ids_with_prp_checks_since_restart} IDs checked in ${ids_checked_since_restart} tries; restarting since we reached max start of 100000"
+  let "ids_checked_since_restart = 0"
+  let "start = ${min_start}"
+  rm /tmp/prp/*
 else
   echo "${ids_with_prp_checks_since_restart} IDs checked in ${ids_checked_since_restart} tries; advancing"
   let "start += ${perpage}"
