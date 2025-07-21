@@ -26,7 +26,10 @@ if [ $please_waits -gt 0 ]; then
   if [ $assigned -eq 0 ]; then
     already=$(grep -c '\(queue\|>C<\|>P<\|>PRP<\)' <<< $all_results)
     if [ $already -eq 0 ]; then
-      let "delay = ${retries} * 2 + 10"
+      let "delay = ${retries} * 3 + 10"
+      if [ $delay -gt 60 ]; then
+        let "delay = 60"
+      fi
       let "urls_time_remaining = ${urls_expiry} - $(date +%s%N) - ($delay * 1000 * 1000 * 1000)"
       if [ $urls_time_remaining -lt 0 ]; then
         echo "$(date -Iseconds): No assignments made, and no results already assigned; giving up on current search and waiting $delay seconds"
