@@ -11,7 +11,7 @@ let "children = 0"
 while true; do
 url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
-results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
+results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
 for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   | uniq); do
   (
@@ -22,7 +22,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
     exit 0
   fi
   echo "Checking ID ${id}"
-  status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "https://factordb.com/${id}\&open=prime\&ct=Proof")
+  status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "https://factordb.com/${id}\&open=prime\&ct=Proof")
 #  actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
 #  let "delay = ($actual_digits * $actual_digits) / 1000000"
 #  echo "PRP with ID ${id} is ${actual_digits} digits; will wait ${delay} s between requests."
@@ -34,7 +34,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   let "stopped_early = 0"
   for base in "${bases_left[@]}"; do
     url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
-    output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
+    output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<< "$url")
     if [ $? -eq 0 ]; then
       if grep -q 'set to C' <<< "$output"; then
         echo "${id}: No longer PRP (ruled out by PRP check)"
