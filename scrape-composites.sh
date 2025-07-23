@@ -91,7 +91,7 @@ let "hour_ns = 60 * ${minute_ns}"
                     echo "${id}: Factor ${factor} of ${num} accepted."
                   fi
                 fi
-              done < <(msieve -e -q -s "/tmp/msieve_${num}.dat" -t "${threads}" filter_mem_mb=512 "${num}" | grep -o ':[0-9 ]\+' | grep -o '[0-9]\+' | head -n -1 | uniq)
+              done < <(msieve -e -q -s "/tmp/msieve_${num}.dat" -t "${threads}" -n filter_mem_mb=2048 "${num}" | grep -o ':[0-9 ]\+' | grep -o '[0-9]\+' | head -n -1 | uniq)
               end_time=$(date +%s%N)
               echo "${id}: $(date -Is): Done factoring ${num} after $(./format-nanos.sh $(($end_time - $start_time)))"
               rm "/tmp/msieve_${num}.dat"
