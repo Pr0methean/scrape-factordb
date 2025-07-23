@@ -1,4 +1,5 @@
 #!/bin/sh
+touch /tmp/msieve.fb
 echo 5 > /tmp/scrape-composites-large-threads
 gnome-terminal --tab --title=LargeC -- bash -c "./scrape-composites-large.sh 2>&1 | tee /tmp/scrape-composites-large.txt"
 # gnome-terminal --tab --title=TinyComposites -- bash -c "nice -+19 ./scrape-composites-tiny.sh 2>&1 | tee /tmp/scrape-composites-tiny.txt"
