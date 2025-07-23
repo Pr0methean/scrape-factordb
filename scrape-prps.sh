@@ -88,6 +88,7 @@ if [ ${ids_with_prp_checks_since_restart} -ne ${old_ids_checked_since_restart} ]
   if [ $restart -ne 0 ]; then
     let "ids_checked_since_restart = 0"
     let "start = ${min_start}"
+    let "old_ids_checked_since_restart = 0"
     rm /tmp/prp/*
     continue
   else
