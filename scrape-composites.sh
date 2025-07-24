@@ -61,10 +61,16 @@ let "hour_ns = 60 * ${minute_ns}"
             echo "${id}: Fetched batch of ${result_count} composites with ${digits} digits"
           fi
         fi
+        touch "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
+        echo "${id}: To cancel this batch: rm /tmp/delete_to_cancel_scrape_composites_batch_${id}"
         echo "${id}: I will factor these composites until at least $(date --date=@$((last_start / 1000000000)))"
         let "factors_so_far = 0"
         let "composites_so_far = 0"
 	for num in $(shuf <<< ${exact_size_results}); do
+          if [ ! -f "/tmp/delete_to_cancel_scrape_composites_batch_${id}" ]; then
+            echo "${id}: $(date -Is): Aborting because /tmp/delete_to_cancel_scrape_composites_batch_${id} was deleted"
+            exit 0
+          fi
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
               start_time=$(date +%s%N)
@@ -99,4 +105,5 @@ let "hour_ns = 60 * ${minute_ns}"
               echo "${id}: Skipping ${num} because it's already being factored"
           fi
 	done
+rm "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
 echo "${id}: Finished all factoring after ${composites_so_far} composites and ${factors_so_far} factors."
