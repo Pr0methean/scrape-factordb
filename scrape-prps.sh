@@ -1,7 +1,6 @@
 #!/bin/bash
 set -u
 let "min_start = 0"
-let "start = ${min_start}"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "min_checks_per_restart = 30 * 255"
 let "checks_since_restart = 0"
@@ -18,14 +17,14 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   bases_checked_lines=$(grep -o '[0-9]\+' <<< "$bases_checked_html")
   declare -a bases_left
   readarray -t bases_left < <(echo {2..255} "${bases_checked_lines}" | tr ' ' '\n' | sort -n | uniq -u | grep .)
-  echo "${id}: Bases left to check: ${bases_left[@]}"
   if [ ${#bases_left[@]} -eq 0 ]; then
     echo "ID ${id} already has all bases checked"
     continue
   fi
+  echo "${id}: ${#bases_left[@]} bases left to check: ${bases_left[@]}"
   actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
   echo "${id}: This PRP is ${actual_digits} digits."
-  if [ $actual_digits -gt 1000 ]; then
+  if [ $actual_digits -ge 1000 ]; then
   # Large PRPs can exhaust our CPU limit, so throttle if we're close to it
     let "now = $(date '+%s')"
     let "delay = $next_start_time - $now"
@@ -33,9 +32,10 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
       echo "Throttling for $delay seconds"
       sleep $delay
     fi
-    let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits / 80 + 10000000) * ${#bases_left[@]}"
+    let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits / 40) * ${#bases_left[@]}"
     echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
-    let "next_start_time = $now + ((7 * $cpu_cost) / 1000000000)"
+    let "next_start_time = $now + ((13 * $cpu_cost) / 1000000000)"
+    echo "Another large PRP won't start until $(date --date=@$next_start_time)."
   fi
 
   let "stopped_early = 0"
