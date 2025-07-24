@@ -31,7 +31,7 @@ let "hour_ns = 60 * ${minute_ns}"
           let "softmax_ns = (300 - ${digits} - ${digits}) * ${minute_ns}"
         fi
         let "last_start = $(date +%s%N) + $softmax_ns"
-        if [ $digits -ge 89 ]; then
+        if [ $digits -ge 90 ]; then
           let "start = (($job * 809) % 1641) * 64"
         elif [ $digits -ge 87 ]; then
           let "start = (($job) % 16) * 64"
