@@ -52,11 +52,11 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
         break
       else
         touch /tmp/prp/${id}
+        if [ $start -ge 500 -a $stopped_early ]; then
+          # PRPs this deep are very large and can exhaust our CPU limit
+          sleep $(($start / 500))
+        fi
       fi
-    fi
-    if [ $start -gt 500 ]; then
-      # PRPs this deep are very large and can exhaust our CPU limit
-      sleep $(($start / 500))
     fi
   done
   if [ $stopped_early -eq 0 ]; then
