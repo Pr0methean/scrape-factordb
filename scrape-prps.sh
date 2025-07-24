@@ -1,21 +1,11 @@
 #!/bin/bash
 set -u
-get_row () {
-  pup -p "body table:nth-child($2) tr:nth-child($3) td:nth-child(2)" <<< "$1" \
-    | sed 's_<td[^>]*>__' \
-    | sed 's_</td>__' \
-    | tr -d '\n' \
-    | tr -d ',' \
-    | tr -d ' '
-}
-
-IFS=':'
 let "min_start = 0"
 let "start = ${min_start}"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "min_checks_per_restart = 30 * 255"
 let "checks_since_restart = 0"
-let "children = 0"
+let "next_start = 0"
 while true; do
 url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
@@ -37,19 +27,15 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   echo "${id}: This PRP is ${actual_digits} digits."
   if [ $actual_digits -gt 1000 ]; then
   # Large PRPs can exhaust our CPU limit, so throttle if we're close to it
+    let "now = $(date '+%s')"
+    let "delay = $next_start_time - $now"
+    if [ $delay -gt 0 ]; then
+      echo "Throttling for $delay seconds"
+      sleep $delay
+    fi
     let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits / 80 + 10000000) * ${#bases_left[@]}"
     echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
-    limits=$(sem --id 'factordb-curl' -j 4 --fg wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 -o/dev/null "https://factordb.com/res.php"_)
-    cpu_time_tenths=$(get_row "${limits}" 2 6 | grep -o '[0-9\.]\+' | sed 's/\.//')
-    echo "CPU time already spent is ${cpu_time_tenths} tenths of a second."
-    let "spare_cpu_time = (6000 - $cpu_time_tenths) - ($cpu_cost / 100000000 )"
-    if [ $spare_cpu_time -le 0 ]; then
-      wait_time=$(get_row "${limits}" 2 7 | grep -o '[0-9:]\+')
-      read -ra min_sec <<< "$wait_time"
-      let "wait_sec = ${min_sec[0]} * 60 + ${min_sec[1]}"
-      echo "Waiting ${wait_sec} seconds for CPU-time allocation to refresh"
-      sleep $wait_sec
-    fi
+    let "next_start_time = $now + ((7 * $cpu_cost) / 1000000000)"
   fi
 
   let "stopped_early = 0"
