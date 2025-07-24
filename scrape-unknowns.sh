@@ -6,6 +6,7 @@ let "min_perpage = 6"
 let "max_perpage = 63"
 let "total_assigned = 0"
 let "minute_ns = 60 * 1000 * 1000 * 1000"
+let "min_restart = 10"
 let "max_delay = 30"
 let "min_delay = 2"
 let "delay = 20"
@@ -98,10 +99,10 @@ done
 let "total_assigned += $assigned"
 let "old_start = $start"
 let "advance = $already + $assigned"
-if [ $old_start -gt 0 -a $total_assigned -ge 10 ]; then
+if [ $old_start -gt 0 -a $total_assigned -ge $min_restart ]; then
   let "start = 0"
   let "total_assigned = 0"
-  let "delay -= (old_start / 3)"
+  let "delay -= 1 + ((${old_start} - ${min_restart}) / 3)"
   if [ $delay -lt $min_delay ]; then
     let "delay = $min_delay"
   fi
