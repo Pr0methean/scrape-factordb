@@ -98,7 +98,7 @@ done
 let "total_assigned += $assigned"
 let "old_start = $start"
 let "advance = $already + $assigned"
-if [ $old_start -gt 0 -a $total_assigned -ge 6 ]; then
+if [ $old_start -gt 0 -a $total_assigned -ge 10 ]; then
   let "start = 0"
   let "total_assigned = 0"
   let "delay -= (old_start / 3)"
