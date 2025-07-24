@@ -6,7 +6,7 @@ rm /tmp/prp/*
 let "min_start = 0"
 let "start = ${min_start}"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
-let "min_ids_per_restart = $perpage + 3"
+let "min_ids_per_restart = 30"
 let "old_ids_checked_since_restart = 0"
 let "children = 0"
 while true; do
@@ -78,13 +78,8 @@ if [ ${ids_with_prp_checks_since_restart} -ne ${old_ids_checked_since_restart} ]
   let "ids_checked_since_restart = ${start} + ${perpage} - ${min_start}"
   let "restart = 0"
   if [ ${ids_with_prp_checks_since_restart} -ge ${min_ids_per_restart} ]; then
-    if [ $((${ids_with_prp_checks_since_restart} * 2)) -ge ${ids_checked_since_restart} ]; then
-      echo "${ids_with_prp_checks_since_restart} IDs checked in ${ids_checked_since_restart} tries; restarting due to sufficient percentage"
-      let "restart = 1"
-    elif [ ${ids_with_prp_checks_since_restart} -ge 30 ]; then
-      echo "${ids_with_prp_checks_since_restart} IDs checked in ${ids_checked_since_restart} tries; restarting due to sufficient number"
-      let "restart = 1"
-    fi
+    echo "${ids_with_prp_checks_since_restart} IDs checked in ${ids_checked_since_restart} tries; restarting due to sufficient number"
+    let "restart = 1"
   elif [ $start -ge 100000 ]; then
     echo "${ids_with_prp_checks_since_restart} IDs checked in ${ids_checked_since_restart} tries; restarting since we reached max start of 100000"
     let "restart = 1"
@@ -101,4 +96,3 @@ if [ ${ids_with_prp_checks_since_restart} -ne ${old_ids_checked_since_restart} ]
 fi
 let "start += ${perpage}"
 done
-
