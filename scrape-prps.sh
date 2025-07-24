@@ -24,9 +24,9 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   fi
   echo "Checking ID ${id}"
   status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "https://factordb.com/${id}\&open=prime\&ct=Proof")
-#  actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
-#  let "delay = ($actual_digits * $actual_digits) / 1000000"
-#  echo "PRP with ID ${id} is ${actual_digits} digits; will wait ${delay} s between requests."
+  actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
+  let "delay = $actual_digits / 2000"
+  echo "PRP with ID ${id} is ${actual_digits} digits; will wait ${delay} s between requests."
   bases_checked_html=$(grep -A1 'Bases checked' <<< "$status")
   bases_checked_lines=$(grep -o '[0-9]\+' <<< "$bases_checked_html")
   declare -a bases_left
@@ -52,9 +52,9 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
         break
       else
         touch /tmp/prp/${id}
-        if [ $start -ge 500 -a $stopped_early ]; then
+        if [ $delay -gt 0 -a $stopped_early -eq 0 ]; then
           # PRPs this deep are very large and can exhaust our CPU limit
-          sleep $(($start / 500))
+          sleep $delay
         fi
       fi
     fi
