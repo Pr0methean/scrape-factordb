@@ -5,7 +5,7 @@ let "start = ${min_start}"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "min_checks_per_restart = 30 * 255"
 let "checks_since_restart = 0"
-let "next_start = 0"
+let "next_start_time = 0"
 while true; do
 url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 echo "Running search: ${url}"
