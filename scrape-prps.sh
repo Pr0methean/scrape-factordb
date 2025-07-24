@@ -54,6 +54,10 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
         touch /tmp/prp/${id}
       fi
     fi
+    if [ $start -gt 500 ]; then
+      # PRPs this deep are very large and can exhaust our CPU limit
+      sleep $(($start / 500))
+    fi
   done
   if [ $stopped_early -eq 0 ]; then
     echo "${id}: All bases checked"
