@@ -34,7 +34,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
     fi
     let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits / 40) * ${#bases_left[@]}"
     echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
-    let "next_start_time = $now + ((13 * $cpu_cost) / 1000000000)"
+    let "next_start_time = $now + ((12 * $cpu_cost) / 1000000000)"
     echo "Another large PRP won't start until $(date --date=@$next_start_time)."
   fi
 
