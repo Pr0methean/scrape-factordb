@@ -1,4 +1,30 @@
 #!/bin/bash
+check_bases() {
+  let "stopped_early = 0"
+  for base in "${bases_left[@]}"; do
+    url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
+    output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<< "$url")
+    if [ $? -eq 0 ]; then
+      if grep -q 'set to C' <<< "$output"; then
+        echo "${id}: No longer PRP (ruled out by PRP check)"
+        let "stopped_early = 1"
+        break
+      elif grep -q '\(Verified\|Processing\)' <<< "$output"; then
+        echo "${id}: No longer PRP (certificate received)"
+        let "stopped_early = 1"
+        break
+      elif ! grep -q 'PRP' <<< "$output"; then
+        echo "${id}: No longer PRP (ruled out by factor or N-1/N+1 check)"
+        let "stopped_early = 1"
+        break
+      fi
+    fi
+  done
+  if [ $stopped_early -eq 0 ]; then
+    echo "${id}: All bases checked"
+  fi
+}
+
 set -u
 let "min_start = 0"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
@@ -36,41 +62,24 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
     echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
     let "next_start_time = $now + ((12 * $cpu_cost) / 1000000000)"
     echo "Another large PRP won't start until $(date --date=@$next_start_time)."
+    check_bases
+  elif [ $actual_digits -ge 800 ]; then
+    check_bases
+  else
+    # Small PRPs can be launched as fire-and-forget subprocesses
+    (check_bases) &
   fi
+  let "checks_since_restart += ${#bases_left[@]}"
 
-  let "stopped_early = 0"
-  for base in "${bases_left[@]}"; do
-    url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
-    let "checks_since_restart += 1"
-    output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<< "$url")
-    if [ $? -eq 0 ]; then
-      if grep -q 'set to C' <<< "$output"; then
-        echo "${id}: No longer PRP (ruled out by PRP check)"
-        let "stopped_early = 1"
-        break
-      elif grep -q '\(Verified\|Processing\)' <<< "$output"; then
-        echo "${id}: No longer PRP (certificate received)"
-        let "stopped_early = 1"
-        break
-      elif ! grep -q 'PRP' <<< "$output"; then
-        echo "${id}: No longer PRP (ruled out by factor or N-1/N+1 check)"
-        let "stopped_early = 1"
-        break
-      fi
-    fi
-  done
-  if [ $stopped_early -eq 0 ]; then
-    echo "${id}: All bases checked"
-  fi
 done
 
 # Restart once we have found enough PRP checks that weren't already done
 let "restart = 0"
 if [ ${checks_since_restart} -ge ${min_checks_per_restart} ]; then
-  echo "${checks_since_restart} PRP checks done; restarting due to sufficient number"
+  echo "${checks_since_restart} PRP checks launched; restarting due to sufficient number"
   let "restart = 1"
 elif [ $start -ge 100000 ]; then
-  echo "${checks_since_restart} PRP checks done; restarting since we reached max start of 100000"
+  echo "${checks_since_restart} PRP checks launched; restarting since we reached max start of 100000"
   let "restart = 1"
 fi
   if [ $restart -ne 0 ]; then
@@ -79,6 +88,6 @@ fi
     continue
   else
     let "start += ${perpage}"
-    echo "${checks_since_restart} PRP checks done after checking ${start} IDs; advancing"
+    echo "${checks_since_restart} PRP checks launched after checking ${start} IDs; advancing"
   fi
 done
