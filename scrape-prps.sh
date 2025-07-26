@@ -27,7 +27,7 @@ check_bases() {
 	elif [ "$@" == "" ]; then
 		let "skipped_bases = ${#bases_left[@]} - $bases_actually_checked"
                 let "checks_since_restart -= $skipped_bases"
-		let "cpu_savings = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${skipped_bases} / 60"
+		let "cpu_savings = ($actual_digits * $actual_digits * $actual_digits + 8000000000) * ${skipped_bases} / 45"
 		echo "Crediting $(./format-nanos.sh $cpu_savings) back to CPU budget for skipped bases."
 		let "cpu_budget += $cpu_savings"
 		if [ "$cpu_budget" -gt "$cpu_budget_max" ]; then
@@ -69,7 +69,7 @@ while true; do
 		fi
 		actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<<"$status" | head -n 1 | grep -o '[0-9]\+')
 		echo "${id}: This PRP is ${actual_digits} digits with ${#bases_left[@]} bases left to check: ${bases_left[@]}"
-		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${#bases_left[@]} / 60"
+		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 8000000000) * ${#bases_left[@]} / 45"
 		echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
 
                 # Search only one PRP at a time
