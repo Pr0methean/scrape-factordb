@@ -26,7 +26,7 @@ check_bases() {
 		echo "${id}: All bases checked"
 	elif [ "$@" == "" ]; then
 		let "skipped_bases = ${#bases_left[@]} - $bases_actually_checked"
-		let "cpu_savings = ($actual_digits + 1500) * ($actual_digits + 1500) * ($actual_digits + 1500) * ${skipped_bases} / 60"
+		let "cpu_savings = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${skipped_bases} / 60"
 		echo "Crediting $(./format-nanos.sh $cpu_savings) back to CPU budget for skipped bases."
 		let "cpu_budget += $cpu_savings"
 		if [ "$cpu_budget" -gt "$cpu_budget_max" ]; then
@@ -68,7 +68,7 @@ while true; do
 		echo "${id}: This PRP is ${actual_digits} digits."
 		# Large PRPs can exhaust our CPU limit, so throttle if we're close to it
 		let "now = $(date '+%s')"
-		let "cpu_cost = (($actual_digits + 1000) * ($actual_digits + 1000) * ($actual_digits + 1000) + 2000000000) * ${#bases_left[@]} / 60"
+		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${#bases_left[@]} / 60"
 		echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
 		if [ $now -lt $next_cpu_budget_reset ]; then
 			let "cpu_budget = $cpu_budget - $cpu_cost"
