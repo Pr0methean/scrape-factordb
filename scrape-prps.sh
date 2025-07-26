@@ -48,6 +48,7 @@ let "next_cpu_budget_reset = 0"
 let "cpu_budget_max = 7 * 60 * 1000 * 1000 * 1000"
 let "cpu_budget_reset_period_secs = 60 * 60"
 let "cpu_budget = 0"
+let "root_pid = $$"
 while true; do
 	url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 	echo "Running search: ${url}"
@@ -100,7 +101,7 @@ while true; do
 			let "cpu_budget = $cpu_budget_max - $cpu_cost"
 		fi
 		echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget)."
-		if [ $actual_digits -ge 700 -o $cpu_budget -le 0 ]; then
+		if [ $actual_digits -lt 700 -a $cpu_budget -gt 0 -a $(ps --ppid "$root_pid" --no-headers | wc -l) -eq 0 ]; then
 			check_bases
 		else
 			# Small PRPs can be launched as fire-and-forget subprocesses
