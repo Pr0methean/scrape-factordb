@@ -38,7 +38,8 @@ check_bases() {
 
 set -u
 let "min_start = 0"
-let "throttled_restart_threshold_per_sec_delay = 10"
+let "throttling_since_restart = 0"
+let "max_throttling_per_restart = 3 * 60 * 60"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "min_checks_per_restart = 30 * 254"
 let "min_checks_per_id_at_restart = 254 / 4"
@@ -68,18 +69,19 @@ while true; do
 		fi
 		actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<<"$status" | head -n 1 | grep -o '[0-9]\+')
 		echo "${id}: This PRP is ${actual_digits} digits with ${#bases_left[@]} bases left to check: ${bases_left[@]}"
+		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${#bases_left[@]} / 60"
+		echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
 
                 # Search only one PRP at a time
                 wait
 		# Large PRPs can exhaust our CPU limit, so throttle if we're close to it
 		let "now = $(date '+%s')"
-		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${#bases_left[@]} / 60"
-		echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
 		if [ $now -lt $next_cpu_budget_reset ]; then
 			let "cpu_budget = $cpu_budget - $cpu_cost"
 			if [ $cpu_budget -lt 0 ]; then
 				let "delay = $next_cpu_budget_reset - $now"
 				echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short. Press SPACE to skip."
+                                let "throttling_since_restart += $delay"
 				if read -t $delay -n 1; then
 					echo "$(date -Is): Throttling skipped."
 					let "time_after = $(date '+%s')"
@@ -106,20 +108,26 @@ while true; do
 	done
 
 	if [ $restart -eq 0 ]; then
-		# Restart once we have found enough PRP checks that weren't already done
-                let "expected_checks_per_restart = ${start} * ${min_checks_per_id_at_restart}"
-                if [ ${expected_checks_per_restart} -lt ${min_checks_per_restart} ]; then
-                        let "expected_checks_per_restart = ${min_checks_per_restart}"
-                fi
-       		if [ ${checks_since_restart} -ge ${expected_checks_per_restart} ]; then
-			echo "${checks_since_restart} PRP checks launched; restarting due to sufficient number"
-			let "restart = 1"
-		elif [ $start -ge 100000 ]; then
+		if [ $start -ge 100000 ]; then
 			echo "${checks_since_restart} PRP checks launched; restarting since we reached max start of 100000"
 			let "restart = 1"
-		fi
+		elif [ ${throttling_since_restart} -ge ${max_throttling_per_restart} ]; then
+                  echo "Throttling of ${total_throttling} seconds has exceeded maximum per restart"
+                  let "restart = 1"
+                else
+		  # Restart once we have found enough PRP checks that weren't already done
+                  let "expected_checks_per_restart = ${start} * ${min_checks_per_id_at_restart}"
+                  if [ ${expected_checks_per_restart} -lt ${min_checks_per_restart} ]; then
+                        let "expected_checks_per_restart = ${min_checks_per_restart}"
+                  fi
+       		  if [ ${checks_since_restart} -ge ${expected_checks_per_restart} ]; then
+			echo "${checks_since_restart} PRP checks launched; restarting due to sufficient number"
+			let "restart = 1"
+                  fi
+                fi
 	fi
 	if [ $restart -ne 0 ]; then
+                let "throttling_since_restart = 0"
 		let "checks_since_restart = 0"
 		let "start = ${min_start}"
 		continue
