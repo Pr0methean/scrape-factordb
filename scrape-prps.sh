@@ -62,8 +62,12 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
     let "cpu_budget = $cpu_budget - $cpu_cost"
     if [ $cpu_budget -lt 0 ]; then
       let "delay = $next_cpu_budget_reset - $now"
-      echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short."
-      sleep $delay
+      echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short. Press SPACE to skip."
+      if read -t $delay -n 1; then
+        echo "$(date -Is): Throttling skipped."
+      else
+        echo "$(date -Is): Throttling delay finished."
+      fi
       let "cpu_budget = $cpu_budget_max - $cpu_cost"
     fi
   else
