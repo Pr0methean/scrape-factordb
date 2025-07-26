@@ -81,12 +81,12 @@ while true; do
 					let "delay = $time_after - $now"
 				else
 					echo "$(date -Is): Throttling delay finished."
+              				let "cpu_budget = $cpu_budget_max - $cpu_cost"
 				fi
 				if [ $delay -ge $(($start * $throttled_restart_threshold_per_sec_delay)) ]; then
 					echo "Restarting due to low position of $start relative to delay of $delay seconds."
 					let "restart = 1"
 				fi
-				let "cpu_budget = $cpu_budget_max - $cpu_cost"
 			fi
 		else
 			echo "$(date -Is): CPU budget has been refreshed."
