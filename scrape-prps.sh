@@ -1,7 +1,9 @@
 #!/bin/bash
 check_bases() {
   let "stopped_early = 0"
+  let "bases_actually_checked = 0"
   for base in "${bases_left[@]}"; do
+    let "bases_actually_checked += 1"
     url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
     output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<< "$url")
     if [ $? -eq 0 ]; then
@@ -22,6 +24,14 @@ check_bases() {
   done
   if [ $stopped_early -eq 0 ]; then
     echo "${id}: All bases checked"
+  elif [ "$1" -eq "" ]; then
+    let "skipped_bases = ${#bases_left[@]} - $bases_actually_checked"
+    let "cpu_savings = ($actual_digits * $actual_digits * $actual_digits + 2500000000) * ${skipped_bases} / 50"
+    echo "Crediting $(./format-nanos.sh $cpu_savings) back to CPU budget for skipped bases."
+    let "cpu_budget += $cpu_savings"
+    if [ "$cpu_budget" -gt "$cpu_budget_max" ]; then
+      let "cpu_budget = $cpu_budget_max"
+    fi
   fi
 }
 
@@ -56,7 +66,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   echo "${id}: This PRP is ${actual_digits} digits."
   # Large PRPs can exhaust our CPU limit, so throttle if we're close to it
   let "now = $(date '+%s')"
-  let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 5000000000) * ${#bases_left[@]} / 50"
+  let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 2500000000) * ${#bases_left[@]} / 50"
   echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
   if [ $now -lt $next_cpu_budget_reset ]; then
     let "cpu_budget = $cpu_budget - $cpu_cost"
@@ -80,7 +90,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
     check_bases
   else
     # Small PRPs can be launched as fire-and-forget subprocesses
-    (check_bases) &
+    (check_bases "in_subprocess") &
   fi
   let "checks_since_restart += ${#bases_left[@]}"
 
