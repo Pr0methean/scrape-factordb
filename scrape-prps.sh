@@ -24,7 +24,7 @@ check_bases() {
   done
   if [ $stopped_early -eq 0 ]; then
     echo "${id}: All bases checked"
-  elif [ "$1" -eq "" ]; then
+  elif [ "$@" -eq "" ]; then
     let "skipped_bases = ${#bases_left[@]} - $bases_actually_checked"
     let "cpu_savings = ($actual_digits * $actual_digits * $actual_digits + 2500000000) * ${skipped_bases} / 50"
     echo "Crediting $(./format-nanos.sh $cpu_savings) back to CPU budget for skipped bases."
