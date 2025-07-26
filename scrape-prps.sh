@@ -68,6 +68,10 @@ while true; do
 		actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<<"$status" | head -n 1 | grep -o '[0-9]\+')
 		echo "${id}: This PRP is ${actual_digits} digits with ${#bases_left[@]} bases left to check: ${bases_left[@]}"
 
+                if [ $actual_digits -ge 2000 ]; then
+                        # Multiple parallel PRPs aren't cache-friendly, so let them finish before starting a very large PRP
+                        wait
+                fi
 		# Large PRPs can exhaust our CPU limit, so throttle if we're close to it
 		let "now = $(date '+%s')"
 		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${#bases_left[@]} / 60"
