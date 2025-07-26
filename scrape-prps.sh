@@ -37,8 +37,9 @@ check_bases() {
 
 set -u
 let "min_start = 0"
+let "throttled_restart_threshold_per_sec_delay = 10"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
-let "min_checks_per_restart = 30 * 255"
+let "min_checks_per_restart = 30 * 254"
 let "checks_since_restart = 0"
 let "next_start_time = 0"
 let "next_cpu_budget_reset = 0"
@@ -51,6 +52,7 @@ echo "Running search: ${url}"
 results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "$url")
 for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   | uniq); do
+  let "restart = 0"
   echo "Checking ID ${id}"
   status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<< "https://factordb.com/${id}\&open=prime\&ct=Proof")
   bases_checked_html=$(grep -A1 'Bases checked' <<< "$status")
@@ -75,8 +77,13 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
       echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short. Press SPACE to skip."
       if read -t $delay -n 1; then
         echo "$(date -Is): Throttling skipped."
+        let "delay = $(($(date '+%s') - $now"
       else
         echo "$(date -Is): Throttling delay finished."
+      fi
+      if [ $delay -ge $(($start * $throttled_restart_threshold_per_sec_delay)) ]; then
+        echo "Restarting due to low position of $start relative to delay of $delay seconds."
+        let "restart = 1"
       fi
       let "cpu_budget = $cpu_budget_max - $cpu_cost"
     fi
@@ -96,8 +103,8 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
 
 done
 
+if [ $restart -eq 0 ]; then
   # Restart once we have found enough PRP checks that weren't already done
-  let "restart = 0"
   if [ ${checks_since_restart} -ge ${min_checks_per_restart} ]; then
     echo "${checks_since_restart} PRP checks launched; restarting due to sufficient number"
     let "restart = 1"
@@ -105,6 +112,7 @@ done
     echo "${checks_since_restart} PRP checks launched; restarting since we reached max start of 100000"
     let "restart = 1"
   fi
+fi
   if [ $restart -ne 0 ]; then
     let "checks_since_restart = 0"
     let "start = ${min_start}"
