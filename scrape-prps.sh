@@ -26,6 +26,7 @@ check_bases() {
 		echo "${id}: All bases checked"
 	elif [ "$@" == "" ]; then
 		let "skipped_bases = ${#bases_left[@]} - $bases_actually_checked"
+                let "checks_since_restart -= $skipped_bases"
 		let "cpu_savings = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${skipped_bases} / 60"
 		echo "Crediting $(./format-nanos.sh $cpu_savings) back to CPU budget for skipped bases."
 		let "cpu_budget += $cpu_savings"
@@ -40,6 +41,7 @@ let "min_start = 0"
 let "throttled_restart_threshold_per_sec_delay = 10"
 urlstart='https://factordb.com/listtype.php?t=1&mindig='
 let "min_checks_per_restart = 30 * 254"
+let "min_checks_per_id_at_restart = 254 / 4"
 let "checks_since_restart = 0"
 let "next_start_time = 0"
 let "next_cpu_budget_reset = 0"
@@ -63,9 +65,9 @@ while true; do
 			echo "ID ${id} already has all bases checked"
 			continue
 		fi
-		echo "${id}: ${#bases_left[@]} bases left to check: ${bases_left[@]}"
 		actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<<"$status" | head -n 1 | grep -o '[0-9]\+')
-		echo "${id}: This PRP is ${actual_digits} digits."
+		echo "${id}: This PRP is ${actual_digits} digits with ${#bases_left[@]} bases left to check: ${bases_left[@]}"
+
 		# Large PRPs can exhaust our CPU limit, so throttle if we're close to it
 		let "now = $(date '+%s')"
 		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${#bases_left[@]} / 60"
@@ -106,7 +108,11 @@ while true; do
 
 	if [ $restart -eq 0 ]; then
 		# Restart once we have found enough PRP checks that weren't already done
-		if [ ${checks_since_restart} -ge ${min_checks_per_restart} ]; then
+                let "expected_checks_per_restart = ${start} * ${min_checks_per_id_at_restart}"
+                if [ ${expected_checks_per_restart} -lt ${min_checks_per_restart} ]; then
+                        let "expected_checks_per_restart = ${min_checks_per_restart}"
+                fi
+       		if [ ${checks_since_restart} -ge ${expected_checks_per_restart} ]; then
 			echo "${checks_since_restart} PRP checks launched; restarting due to sufficient number"
 			let "restart = 1"
 		elif [ $start -ge 100000 ]; then
