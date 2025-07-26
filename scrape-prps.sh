@@ -81,7 +81,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
       let "cpu_budget = $cpu_budget_max - $cpu_cost"
     fi
   else
-    echo "CPU budget has been refreshed."
+    echo "$(date -Is): CPU budget has been refreshed."
     let "next_cpu_budget_reset = $now + $cpu_budget_reset_period_secs"
     let "cpu_budget = $cpu_budget_max - $cpu_cost"
   fi
