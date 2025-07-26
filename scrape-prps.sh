@@ -69,10 +69,8 @@ while true; do
 		actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<<"$status" | head -n 1 | grep -o '[0-9]\+')
 		echo "${id}: This PRP is ${actual_digits} digits with ${#bases_left[@]} bases left to check: ${bases_left[@]}"
 
-                if [ $actual_digits -ge 2000 ]; then
-                        # Multiple parallel PRPs aren't cache-friendly, so let them finish before starting a very large PRP
-                        wait
-                fi
+                # Search only one PRP at a time
+                wait
 		# Large PRPs can exhaust our CPU limit, so throttle if we're close to it
 		let "now = $(date '+%s')"
 		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 4000000000) * ${#bases_left[@]} / 60"
@@ -101,12 +99,8 @@ while true; do
 			let "cpu_budget = $cpu_budget_max - $cpu_cost"
 		fi
 		echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget)."
-		if [ $actual_digits -lt 700 -a $cpu_budget -gt 0 -a $(ps --ppid "$root_pid" --no-headers | wc -l) -eq 0 ]; then
-			check_bases
-		else
-			# Small PRPs can be launched as fire-and-forget subprocesses
-			(check_bases 1) &
-		fi
+		# Use a subprocess to check this PRP while searching for another
+		(check_bases 1) &
 		let "checks_since_restart += ${#bases_left[@]}"
 
 	done
