@@ -32,7 +32,7 @@ let "min_checks_per_restart = 30 * 255"
 let "checks_since_restart = 0"
 let "next_start_time = 0"
 let "next_cpu_budget_reset = 0"
-let "cpu_budget_max = 5 * 60 * 1000 * 1000 * 1000"
+let "cpu_budget_max = 8 * 60 * 1000 * 1000 * 1000"
 let "cpu_budget_reset_period_secs = 60 * 60"
 let "cpu_budget = 0"
 while true; do
@@ -54,25 +54,23 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   echo "${id}: ${#bases_left[@]} bases left to check: ${bases_left[@]}"
   actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<< "$status" | head -n 1 | grep -o '[0-9]\+')
   echo "${id}: This PRP is ${actual_digits} digits."
-  if [ $actual_digits -ge 1000 ]; then
   # Large PRPs can exhaust our CPU limit, so throttle if we're close to it
-    let "now = $(date '+%s')"
-    let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits * ${#bases_left[@]}) / 60"
-    echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
-    if [ $now -lt $next_cpu_budget_reset ]; then
-      let "cpu_budget = $cpu_budget - $cpu_cost"
-      if [ $cpu_budget -lt 0 ]; then
-        let "delay = $next_budget_reset - $now"
-        echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short."
-        sleep $delay
-        let "cpu_budget = $cpu_budget_max - $cpu_cost"
-      fi
-    else
-      let "next_cpu_budget_reset = $now + $cpu_budget_reset_period_secs"
+  let "now = $(date '+%s')"
+  let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits * ${#bases_left[@]}) / 50"
+  echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
+  if [ $now -lt $next_cpu_budget_reset ]; then
+    let "cpu_budget = $cpu_budget - $cpu_cost"
+    if [ $cpu_budget -lt 0 ]; then
+      let "delay = $next_cpu_budget_reset - $now"
+      echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short."
+      sleep $delay
       let "cpu_budget = $cpu_budget_max - $cpu_cost"
     fi
-    check_bases
-  elif [ $actual_digits -ge 800 ]; then
+  else
+    let "next_cpu_budget_reset = $now + $cpu_budget_reset_period_secs"
+    let "cpu_budget = $cpu_budget_max - $cpu_cost"
+  fi
+  if [ $actual_digits -ge 700 ]; then
     check_bases
   else
     # Small PRPs can be launched as fire-and-forget subprocesses
