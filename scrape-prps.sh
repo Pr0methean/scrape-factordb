@@ -56,7 +56,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
   echo "${id}: This PRP is ${actual_digits} digits."
   # Large PRPs can exhaust our CPU limit, so throttle if we're close to it
   let "now = $(date '+%s')"
-  let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits * ${#bases_left[@]}) / 50"
+  let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 5000000000) * ${#bases_left[@]} / 50"
   echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
   if [ $now -lt $next_cpu_budget_reset ]; then
     let "cpu_budget = $cpu_budget - $cpu_cost"
