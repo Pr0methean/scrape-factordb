@@ -43,7 +43,7 @@ let "min_checks_per_restart = 30 * 254"
 let "checks_since_restart = 0"
 let "next_start_time = 0"
 let "next_cpu_budget_reset = 0"
-let "cpu_budget_max = 8 * 60 * 1000 * 1000 * 1000"
+let "cpu_budget_max = (7 * 60 + 30) * 1000 * 1000 * 1000"
 let "cpu_budget_reset_period_secs = 60 * 60"
 let "cpu_budget = 0"
 while true; do
