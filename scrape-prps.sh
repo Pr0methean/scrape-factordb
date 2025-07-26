@@ -74,7 +74,7 @@ for id in $(grep -o 'index.php?id=[0-9]\+' <<< "$results" \
     let "next_cpu_budget_reset = $now + $cpu_budget_reset_period_secs"
     let "cpu_budget = $cpu_budget_max - $cpu_cost"
   fi
-  if [ $actual_digits -ge 700 ]; then
+  if [ $actual_digits -ge 700 -o $cpu_budget -le 0 ]; then
     check_bases
   else
     # Small PRPs can be launched as fire-and-forget subprocesses
