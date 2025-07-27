@@ -45,7 +45,7 @@ let "hour_ns = 60 * ${minute_ns}"
         # Don't choose ones ending in 0,2,4,5,6,8, because those are still being trial-factored which may
         # duplicate our work.
         url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=${stimulate}&start=${start}&download=1"
-        results=$(sem --id 'factordb-curl' --fg -j 4 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
+        results=$(sem --id 'factordb-curl' --fg -j 3 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
         declare exact_size_results
         if [ $digits -ge 89 ]; then
           # Assume exact size, since there are so many numbers in these sizes
@@ -84,7 +84,7 @@ let "hour_ns = 60 * ${minute_ns}"
               while read -r factor; do
                 let "factors_so_far += 1"
                 echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
-                output=$(sem --id 'factordb-curl' --fg -j 4 curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}")
+                output=$(sem --id 'factordb-curl' --fg -j 3 curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}")
                 if [ $? -ne 0 ]; then
                   echo "${id}: Error submitting factor ${factor} of ${num}!"
                   echo "${num},${factor}" >> "failed-submissions.csv"

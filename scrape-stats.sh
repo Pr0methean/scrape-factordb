@@ -13,7 +13,7 @@ try_assign_prp () {
   if [ ! -f "/tmp/factordb-scraped-unknowns/$1" ]; then
     assign_least_u="https://factordb.com/index.php?id=$1&prp=Assign+to+worker"
     echo $1
-    result=$(sem --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate -nv -O- -o/dev/null "${assign_least_u}" | grep '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\|Please wait\)')
+    result=$(sem --id 'factordb-curl' -j 3 wget -e robots=off --no-check-certificate -nv -O- -o/dev/null "${assign_least_u}" | grep '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\|Please wait\)')
     grep -q "Assigned" "${result}"
     if [ "$?" ]; then
       touch "/tmp/factordb-scraped-unknowns/$1"
@@ -28,7 +28,7 @@ mkdir -p "/tmp/factordb-scraped-unknowns"
 
 while true; do
   (
-    results=$(sem --id 'factordb-curl' -j 4 wget -e robots=off -nv --no-check-certificate -O- -o /dev/null 'https://factordb.com/status.php')
+    results=$(sem --id 'factordb-curl' -j 3 wget -e robots=off -nv --no-check-certificate -O- -o /dev/null 'https://factordb.com/status.php')
     time=$(date -u --iso-8601=seconds)
     p=$(get_row "${results}" 4 2)
     prp=$(get_row "${results}" 4 3)

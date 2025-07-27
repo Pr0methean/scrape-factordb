@@ -3,7 +3,7 @@ let "next_cpu_budget_reset = 0"
 let "cpu_budget_max = 8 * 60 * 1000 * 1000 * 1000"
 let "cpu_budget_reset_period = 60 * 60 * 1000 * 1000 * 1000"
 let "cpu_budget = 0"
-
+next_cpu_budget_reset_formatted="now"
 set -u
 id=""
 actual_digits=0
@@ -16,6 +16,7 @@ while read line; do
         echo "${id}: Estimated CPU cost is $(./format-nanos.sh $(($cpu_cost * ${#bases_left[@]})))"
 	let "stopped_early = 0"
 	let "bases_actually_checked = 0"
+	url_base="https://factordb.com/index.php\?id=${id}\&open=prime\&basetocheck="
 	for base in "${bases_left[@]}"; do
                 now=$(date +%s%N)
                 budget_reset=0
@@ -34,12 +35,12 @@ while read line; do
                         echo "$(date -Is): CPU budget has been refreshed."
                         let "next_cpu_budget_reset = $now + $cpu_budget_reset_period"
                         let "cpu_budget = $cpu_budget_max - $cpu_cost"
-                        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget) until $(date -Is --date @$((${next_cpu_budget_reset} / 1000000000)))."
+                        next_cpu_budget_reset_formatted=$(date -Is --date @$((${next_cpu_budget_reset} / 1000000000)))
+                        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget) until ${next_cpu_budget_reset_formatted}."
                 fi
 
 		let "bases_actually_checked += 1"
-		url="https://factordb.com/index.php\?id=${id}\&open=prime\&basetocheck=${base}"
-		output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<<"$url")
+		output=$(sem --id 'factordb-curl' -j 3 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<<"${url_base}${base}")
 		if [ $? -eq 0 ]; then
 			if grep -q 'set to C' <<<"$output"; then
 				echo "${id}: No longer PRP (ruled out by PRP check)"
@@ -56,8 +57,8 @@ while read line; do
 			fi
 		fi
 	done
-        if [ "$stopped_early" -eq "0" ]; then
+        if [ "$stopped_early" -eq 0 ]; then
 		echo "${id}: All bases checked"
 	fi
-        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget) until $(date -Is --date @$((${next_cpu_budget_reset} / 1000000000)))."
+        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget) until ${next_cpu_budget_reset_formatted}."
 done

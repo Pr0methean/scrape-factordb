@@ -14,7 +14,7 @@ urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 while true; do
 url="${urlstart}${digits}\&perpage=${perpage}\&start=${start}"
 echo "$(date -Iseconds): searching ${url}"
-urls=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certificate --retry-connrefused --retry-on-http-error=502 -T 30 -t 3 -q -O- -o/dev/null -- "${url}" \
+urls=$(sem --fg --id 'factordb-curl' -j 3 wget -e robots=off --no-check-certificate --retry-connrefused --retry-on-http-error=502 -T 30 -t 3 -q -O- -o/dev/null -- "${url}" \
   | grep '#BB0000' \
   | grep -o 'index.php?id=[0-9]\+' \
   | uniq \
@@ -22,7 +22,7 @@ urls=$(sem --fg --id 'factordb-curl' -j 4 wget -e robots=off --no-check-certific
   | sed 's_.\+_https://factordb.com/&\&prp=Assign+to+worker_')
 let "urls_expiry = $(date +%s%N) + 15 * ${minute_ns}"
 while true; do
-all_results=$(sem --fg --id 'factordb-curl' -j 4 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- <<< "${urls}" \
+all_results=$(sem --fg --id 'factordb-curl' -j 3 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- <<< "${urls}" \
   | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
 echo "$all_results"
 assigned=$(grep -c 'Assigned' <<< $all_results)
