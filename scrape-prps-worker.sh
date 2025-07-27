@@ -21,14 +21,16 @@ while read line; do
                 if [ "$now" -lt "$next_cpu_budget_reset" ]; then
                         let "cpu_budget = $cpu_budget - $cpu_cost"
                         if [ $cpu_budget -lt 0 ]; then
+                                let "next_cpu_budget_reset = $now + $cpu_budget_reset_period"
                                 let "delay = ($next_cpu_budget_reset - $now + 1) / (1000 * 1000 * 1000)"
                                 echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short. Press SPACE to skip."
+                                sleep $delay
                         fi
                 else
                         echo "$(date -Is): CPU budget has been refreshed."
                         let "next_cpu_budget_reset = $now + $cpu_budget_reset_period"
                         let "cpu_budget = $cpu_budget_max - $cpu_cost"
-                        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget)."
+                        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget) until $(date -Is --date @$((${next_cpu_budget_reset} / 1000000000)))."
                 fi
 
 		let "bases_actually_checked += 1"
@@ -53,5 +55,5 @@ while read line; do
         if [ "$stopped_early" -eq "0" ]; then
 		echo "${id}: All bases checked"
 	fi
-        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget)."
+        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget) until $(date -Is --date @$((${next_cpu_budget_reset} / 1000000000)))."
 done
