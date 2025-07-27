@@ -23,14 +23,6 @@ while read line; do
                         if [ $cpu_budget -lt 0 ]; then
                                 let "delay = ($next_cpu_budget_reset - $now + 1) / (1000 * 1000 * 1000)"
                                 echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short. Press SPACE to skip."
-                                if read -t $delay -n 1; then
-                                        echo "$(date -Is): Throttling skipped."
-                                        let "time_after = $(date '+%s')"
-                                        let "delay = $time_after - $now"
-                                else
-                                        echo "$(date -Is): Throttling delay finished."
-                                        let "cpu_budget = $cpu_budget_max - $cpu_cost"
-                                fi
                         fi
                 else
                         echo "$(date -Is): CPU budget has been refreshed."
