@@ -35,7 +35,7 @@ while read line; do
 
 		let "bases_actually_checked += 1"
 		url="https://factordb.com/index.php\?id=${id}\&open=prime\&basetocheck=${base}"
-		output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<<"$url")
+		output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 --retry-on-http-error=429 <<<"$url")
 		if [ $? -eq 0 ]; then
 			if grep -q 'set to C' <<<"$output"; then
 				echo "${id}: No longer PRP (ruled out by PRP check)"
