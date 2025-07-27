@@ -18,15 +18,19 @@ while read line; do
 	let "bases_actually_checked = 0"
 	for base in "${bases_left[@]}"; do
                 now=$(date +%s%N)
+                budget_reset=0
                 if [ "$now" -lt "$next_cpu_budget_reset" ]; then
                         let "cpu_budget = $cpu_budget - $cpu_cost"
                         if [ $cpu_budget -lt 0 ]; then
-                                let "next_cpu_budget_reset = $now + $cpu_budget_reset_period"
                                 let "delay = ($next_cpu_budget_reset - $now + 1) / (1000 * 1000 * 1000)"
                                 echo "Throttling for $delay seconds, because our budget is $(./format-nanos.sh $((-$cpu_budget))) short. Press SPACE to skip."
                                 sleep $delay
+                                budget_reset=1
                         fi
                 else
+                        budget_reset=1
+                fi
+                if [ $budget_reset -ne 0 ]; then
                         echo "$(date -Is): CPU budget has been refreshed."
                         let "next_cpu_budget_reset = $now + $cpu_budget_reset_period"
                         let "cpu_budget = $cpu_budget_max - $cpu_cost"
@@ -35,7 +39,7 @@ while read line; do
 
 		let "bases_actually_checked += 1"
 		url="https://factordb.com/index.php\?id=${id}\&open=prime\&basetocheck=${base}"
-		output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 --retry-on-http-error=429 <<<"$url")
+		output=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<<"$url")
 		if [ $? -eq 0 ]; then
 			if grep -q 'set to C' <<<"$output"; then
 				echo "${id}: No longer PRP (ruled out by PRP check)"
