@@ -12,10 +12,11 @@ while true; do
 	echo "Running search: ${url}"
 	results=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<<"$url")
 	for id in $(grep -o 'index.php?id=[0-9]\+' <<<"$results" |
+                grep -o '[0-9]\+' |
 		uniq); do
 		let "restart = 0"
 		echo "Checking ID ${id}"
-		status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<<"https://factordb.com/${id}\&open=prime\&ct=Proof")
+		status=$(sem --id 'factordb-curl' -j 4 --fg xargs wget -e robots=off --no-check-certificate -t 10 -T 10 -nv -O- --retry-connrefused --retry-on-http-error=502 <<<"https://factordb.com/index.php\?id=${id}\&open=prime\&ct=Proof")
 		bases_checked_html=$(grep -A1 'Bases checked' <<<"$status")
 		bases_checked_lines=$(grep -o '[0-9]\+' <<<"$bases_checked_html")
 		declare -a bases_left
