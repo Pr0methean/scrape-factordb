@@ -1,21 +1,25 @@
 #!/bin/bash
 let "next_cpu_budget_reset = 0"
-let "cpu_budget_max = 7 * 60 * 1000 * 1000 * 1000"
-let "cpu_budget_reset_period_secs = 60 * 60"
+let "cpu_budget_max = 8 * 60 * 1000 * 1000 * 1000"
+let "cpu_budget_reset_period = 60 * 60 * 1000 * 1000 * 1000"
 let "cpu_budget = 0"
 
 set -u
 id=""
+actual_digits=0
 bases_left=()
-while read id; do
-        read actual_digits
-        read -a bases_left
+while read line; do
+        read id actual_digits rest_of_line <<< "$line"
+        IFS=' ' read -r -a bases_left <<< "$rest_of_line"
+        echo "${id}: Got ID"
+        echo "${id}: This PRP has ${actual_digits} digits and ${#bases_left[@]} bases left to check."
+        let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 8000000000) / 45"
+        echo "${id}: Estimated CPU cost is $(./format-nanos.sh $(($cpu_cost * ${#bases_left[@]})))"
 	let "stopped_early = 0"
 	let "bases_actually_checked = 0"
-        let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 8000000000)"
-        echo "{id}: This PRP has ${actual_digits} digits and ${#bases_left[@]} bases left to check; estimated CPU cost is $(./format-nanos.sh $(($cpu_cost * ${#bases_left[@]})))"
 	for base in "${bases_left[@]}"; do
-                if [ $now -lt $next_cpu_budget_reset ]; then
+                now=$(date +%s%N)
+                if [ "$now" -lt "$next_cpu_budget_reset" ]; then
                         let "cpu_budget = $cpu_budget - $cpu_cost"
                         if [ $cpu_budget -lt 0 ]; then
                                 let "delay = $next_cpu_budget_reset - $now"
@@ -31,10 +35,10 @@ while read id; do
                         fi
                 else
                         echo "$(date -Is): CPU budget has been refreshed."
-                        let "next_cpu_budget_reset = $now + $cpu_budget_reset_period_secs"
+                        let "next_cpu_budget_reset = $now + $cpu_budget_reset_period"
                         let "cpu_budget = $cpu_budget_max - $cpu_cost"
+                        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget)."
                 fi
-                echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget)."
 
 		let "bases_actually_checked += 1"
 		url="https://factordb.com/${id}\&open=prime\&basetocheck=${base}"
@@ -58,4 +62,5 @@ while read id; do
         if [ "$stopped_early" -eq "0" ]; then
 		echo "${id}: All bases checked"
 	fi
+        echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget)."
 done

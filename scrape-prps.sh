@@ -6,6 +6,7 @@ let "min_checks_per_restart = 30 * 254"
 let "min_checks_per_id_at_restart = 254 / 4"
 let "checks_since_restart = 0"
 fifo="$1"
+echo "Writing to $fifo"
 while true; do
 	url="${urlstart}${digits}&perpage=${perpage}\&start=${start}"
 	echo "Running search: ${url}"
@@ -26,15 +27,13 @@ while true; do
 		actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<<"$status" | head -n 1 | grep -o '[0-9]\+')
 		echo "${id}: This PRP is ${actual_digits} digits with ${#bases_left[@]} bases left to check: ${bases_left[@]}"
 		# Use a subprocess to check this PRP while searching for another
-		echo "$id" >> $fifo
-                echo "$actual_digits" >> $fifo
-                echo "${bases_left[@]}" >> $fifo
+		echo "$id $actual_digits ${bases_left[@]}" >> $fifo
 		let "checks_since_restart += ${#bases_left[@]}"
 
 	done
 
 	if [ $restart -eq 0 ]; then
-		if [ $start -ge 100000 ]; then
+		if [ $(($start + $perpage)) -gt 100000 ]; then
 			echo "${checks_since_restart} PRP checks launched; restarting since we reached max start of 100000"
 			let "restart = 1"
                 else
