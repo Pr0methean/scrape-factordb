@@ -3,9 +3,9 @@ set -u
 fifo_id="/tmp/$(uuidgen)"
 mkfifo "${fifo_id}"
 let "job = 9999999999"
-let "max_job = 1641 * 29 * 11 * 16 * 2"
+let "max_job = 1641 * 29 * 11 * 16 * 512"
 while [ $job -ge "$max_job" ]; do # Select random point in the cycle, with no modulo bias
-  let "job = $(openssl rand 3 | od -DAn)"
+  let "job = $SRANDOM"
 done
 let "id = 1"
 while [ ! -f "${fifo_id}" ]; do
