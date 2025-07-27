@@ -72,8 +72,6 @@ while true; do
 		let "cpu_cost = ($actual_digits * $actual_digits * $actual_digits + 8000000000) * ${#bases_left[@]} / 45"
 		echo "Estimated server CPU time for ${id} is $(./format-nanos.sh $cpu_cost)."
 
-                # Search only one PRP at a time
-                wait
 		# Large PRPs can exhaust our CPU limit, so throttle if we're close to it
 		let "now = $(date '+%s')"
 		if [ $now -lt $next_cpu_budget_reset ]; then
@@ -102,7 +100,7 @@ while true; do
 		fi
 		echo "Remaining CPU budget is $(./format-nanos.sh $cpu_budget)."
 		# Use a subprocess to check this PRP while searching for another
-		(check_bases 1) &
+		(sem --j 1 --id 'factordb_checkbases' check_bases 1) &
 		let "checks_since_restart += ${#bases_left[@]}"
 
 	done
@@ -130,6 +128,7 @@ while true; do
                 let "throttling_since_restart = 0"
 		let "checks_since_restart = 0"
 		let "start = ${min_start}"
+                wait
 		continue
 	else
 		let "start += ${perpage}"
