@@ -26,11 +26,12 @@ while true; do
 			continue
 		fi
 		actual_digits=$(grep -o '&lt;[0-9]\+&gt;' <<<"$status" | head -n 1 | grep -o '[0-9]\+')
-		echo "${id}: This PRP is ${actual_digits} digits with ${#bases_left[@]} bases left to check: ${bases_left[@]}"
-		# Use a subprocess to check this PRP while searching for another
-		echo "$id $actual_digits ${bases_left[@]}" >> $fifo
-		let "checks_since_restart += ${#bases_left[@]}"
-
+                if [ "$actual_digits" != "" ]; then
+		  echo "${id}: This PRP is ${actual_digits} digits with ${#bases_left[@]} bases left to check: ${bases_left[@]}"
+	 	  # Use a subprocess to check this PRP while searching for another
+		  echo "$id $actual_digits ${bases_left[@]}" >> $fifo
+		  let "checks_since_restart += ${#bases_left[@]}"
+                fi
 	done
 
 	if [ $restart -eq 0 ]; then
