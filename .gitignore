@@ -1,6 +1,6 @@
 factor
 ff
-stats.csv
+*.csv
 index.php*
 fit.log
 msieve.log
