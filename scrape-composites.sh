@@ -81,13 +81,14 @@ let "hour_ns = 60 * ${minute_ns}"
               let "composites_so_far += 1"
               while read -r factor; do
                 let "factors_so_far += 1"
-                echo "${id}: $(date -Is): Found factor ${factor} of ${num}"
+                now="$(date -Is)"
+                echo "${id}: ${now}: Found factor ${factor} of ${num}"
                 output=$(sem --id 'factordb-curl' --fg -j 3 curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}")
                 if [ $? -ne 0 ]; then
                   echo "${id}: Error submitting factor ${factor} of ${num}!"
-                  echo "\"$(date -Is)\",${num},${factor}" >> "failed-submissions.csv"
+                  echo "\"${now}\",${num},${factor}" >> "failed-submissions.csv"
                 else
-                  echo "\"$(date -Is)\",${num},${factor}" >> "factor-submissions.csv"
+                  echo "\"${now}\",${num},${factor}" >> "factor-submissions.csv"
                   grep -q "Already" <<< "$output"
                   if [ $? -eq 0 ]; then
                     echo "${id}: Factor ${factor} of ${num} already known! Aborting batch after ${factors_so_far} factors and ${composites_so_far} composites."
