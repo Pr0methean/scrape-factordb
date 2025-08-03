@@ -1,8 +1,8 @@
 #!/bin/bash
 set -u
 let "start = 0"
-let "perpage = 6"
-let "min_perpage = 6"
+let "perpage = 3"
+let "min_perpage = 3"
 let "max_perpage = 63"
 let "total_assigned = 0"
 let "minute_ns = 60 * 1000 * 1000 * 1000"
