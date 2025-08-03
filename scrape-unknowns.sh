@@ -1,9 +1,9 @@
 #!/bin/bash
 set -u
 let "start = 0"
-let "perpage = 3"
-let "min_perpage = 3"
-let "max_perpage = 63"
+let "perpage = 1"
+let "min_perpage = 1"
+let "max_perpage = 3"
 let "total_assigned = 0"
 let "minute_ns = 60 * 1000 * 1000 * 1000"
 let "min_restart = 10"
@@ -28,15 +28,20 @@ echo "$all_results"
 assigned=$(grep -c 'Assigned' <<< $all_results)
 please_waits=$(grep -c 'Please wait' <<< $all_results)
 already=$(grep -c '\(queue\|>C<\|>P<\|>PRP<\)' <<< $all_results)
-if [ $(($already + 2)) -ge $perpage ]; then
-  let "perpage += 3"
-  if [ $perpage -gt $max_perpage ]; then
-    let "perpage = $max_perpage"
-  else
+if [ $perpage -lt $max_perpage ]; then
+  if [ $perpage -ge 3 -a $((already + 2)) -gt $perpage ]; then
+    let "perpage += 3"
+    echo "Increased number of results per page to $perpage."
+  elif [ $perpage -lt 3 -a $already -ge $perpage ]; then
+    let "perpage += 1"
     echo "Increased number of results per page to $perpage."
   fi
 elif [ $(($please_waits + 2)) -ge $perpage -a $perpage -gt $min_perpage ]; then
-  let "perpage -= 3"
+  if [ $perpage -gt 3 ]; then
+    let "perpage -= 3"
+  else
+    let "perpage -= 1"
+  fi
   echo "Decreased number of results per page to $perpage."
 fi
 if [ $please_waits -gt 0 -a $assigned -lt 3 ]; then
