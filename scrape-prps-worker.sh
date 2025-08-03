@@ -40,7 +40,7 @@ while read line; do
                 fi
 
 		let "bases_actually_checked += 1"
-		output=$(sem --id 'factordb-curl' -j 3 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<<"${url_base}${base}")
+		output=$(sem --id 'factordb-curl' -j 2 --fg xargs wget -e robots=off --no-check-certificate -nv -O- -t 10 -T 10 --retry-connrefused --retry-on-http-error=502 <<<"${url_base}${base}")
 		if [ $? -eq 0 ]; then
 			if grep -q 'set to C' <<<"$output"; then
 				echo "${id}: No longer PRP (ruled out by PRP check)"
