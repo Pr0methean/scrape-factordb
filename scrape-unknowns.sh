@@ -18,12 +18,17 @@ while true; do
   result=$(sem --fg --id 'factordb-curl' -j 2 xargs -n 3 wget -e robots=off --no-check-certificate -q -T 30 -t 3 --retry-connrefused --retry-on-http-error=502 -O- -o/dev/null -- <<< "${url}" \
     | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
   echo $result
-  grep -q 'Please wait' <<< $result
-  if [ $? -eq 0 ]; then
-    echo "Got 'Please wait' for $id"
+  if [ $result == "" ]; then
+    echo "Got no response for $id"
     sleep 30
   else
-    break
+    grep -q 'Please wait' <<< $result
+    if [ $? -eq 0 ]; then
+      echo "Got 'Please wait' for $id"
+      sleep 30
+    else
+      break
+    fi
   fi
 done
 let "entries += 1"
