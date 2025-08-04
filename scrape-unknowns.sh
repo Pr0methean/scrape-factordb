@@ -11,7 +11,6 @@ let "max_delay = 30"
 let "min_delay = 2"
 let "delay = 20"
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
-for (( size=104; size>=104; size-- )); do
 let "entries = 0"
 while IFS=, read -r id expr; do
 url="https://factordb.com/?id=${id}\&prp=Assign+to+worker"
@@ -28,6 +27,6 @@ while true; do
   fi
 done
 let "entries += 1"
-echo "Processed ${entries} entries in U${size}000.csv"
-done < U${size}000.csv
+echo "Processed ${entries} entries in U_all.csv"
+done < U_all.csv
 done
