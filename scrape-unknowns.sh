@@ -11,12 +11,12 @@ while true; do
     | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
   echo $result
   if [ -z "$result" ]; then
-    echo "Got no response for $id"
+    echo "$(date -Is): Got no response for $id"
     sleep 30
   else
     grep -q 'Please wait' <<< $result
     if [ $? -eq 0 ]; then
-      echo "Got 'Please wait' for $id"
+      echo "$(date -Is): Got 'Please wait' for $id"
       sleep 10
     else
       break
@@ -24,7 +24,7 @@ while true; do
   fi
 done
 let "entries += 1"
-echo "Processed ${entries} entries in ${file}"
+echo "$(date -Is): Processed ${entries} entries in ${file}"
 done < ${file}
 done
 done
