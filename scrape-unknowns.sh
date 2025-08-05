@@ -2,6 +2,8 @@
 set -u
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 let "entries = 0"
+for (( page=1; page<=14553; page++ )); do
+file=$(printf 'U%06d.csv' "$page")
 while IFS=, read -r id expr; do
 url="https://factordb.com/?id=${id}\&prp=Assign+to+worker"
 while true; do
@@ -22,6 +24,7 @@ while true; do
   fi
 done
 let "entries += 1"
-echo "Processed ${entries} entries in U_all.csv"
-done < U_all.csv
+echo "Processed ${entries} entries in ${file}"
+done < ${file}
+done
 done
