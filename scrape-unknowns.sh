@@ -1,8 +1,8 @@
 #!/bin/bash
 set -u
 urlstart="https://factordb.com/listtype.php?t=2\&mindig="
-let "entries = 0"
 for (( page=0; page<=14553; page++ )); do
+let "entries = 0"
 file=$(printf 'U%06d.csv' "$page")
 while IFS=, read -r id expr; do
 url="https://factordb.com/?id=${id}\&prp=Assign+to+worker"
