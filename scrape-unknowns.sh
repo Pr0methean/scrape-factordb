@@ -4,6 +4,10 @@ urlstart="https://factordb.com/listtype.php?t=2\&mindig="
 for (( page=0; page<=14553; page++ )); do
 let "entries = 0"
 file=$(printf 'U%06d.csv' "$page")
+if [ ! -f "$file" ]; then
+  echo "Skipping $file since it doesn't exist"
+  continue
+fi
 while IFS=, read -r id expr; do
 url="https://factordb.com/?id=${id}\&prp=Assign+to+worker"
 while true; do
@@ -11,14 +15,15 @@ while true; do
     | grep '\(ssign\|queue\|>C<\|>P<\|>PRP<\)')
   echo $result
   if [ -z "$result" ]; then
-    echo "$(date -Is): Got no response for $id"
+    echo "$(date -Is): Got no response for $id ($expr)"
     sleep 30
   else
     grep -q 'Please wait' <<< $result
     if [ $? -eq 0 ]; then
-      echo "$(date -Is): Got 'Please wait' for $id"
+      echo "$(date -Is): Got 'Please wait' for $id ($expr)"
       sleep 10
     else
+      echo "$(date -Is): Assigned PRP check for $id ($expr)"
       break
     fi
   fi
