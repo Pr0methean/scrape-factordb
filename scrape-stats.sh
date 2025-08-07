@@ -14,7 +14,7 @@ try_assign_prp () {
     assign_least_u="https://factordb.com/index.php?id=$1&prp=Assign+to+worker"
     echo $1
     result=$(sem --id 'factordb-curl' -j 2 wget -e robots=off --no-check-certificate -nv -O- -o/dev/null "${assign_least_u}" | grep '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\|Please wait\)')
-    grep -q "Assigned" "${result}"
+    grep -q "Assigned" <<< "${result}"
     if [ "$?" ]; then
       touch "/tmp/factordb-scraped-unknowns/$1"
       return 0
