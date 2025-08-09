@@ -12,15 +12,16 @@ get_row () {
 try_assign_prp () {
   if [ ! -f "/tmp/factordb-scraped-unknowns/$1" ]; then
     assign_least_u="https://factordb.com/index.php?id=$1&prp=Assign+to+worker"
-    echo $1
     result=$(sem --id 'factordb-curl' -j 2 wget -e robots=off --no-check-certificate -nv -O- -o/dev/null "${assign_least_u}" | grep '\(>C<\|>PRP<\|>P<\|>CF<\|>FF<\|Assigned\|already\|Please wait\)')
     grep -q "Assigned" <<< "${result}"
-    if [ "$?" ]; then
+    if [ $? ]; then
       touch "/tmp/factordb-scraped-unknowns/$1"
       return 0
     else
       return 1
     fi
+  else
+    return 1
   fi
 }
 
@@ -48,7 +49,8 @@ while true; do
       if [ "${least_u_row}" != "" ]; then
         least_u_id=$(grep -o 'index\.php?id=[0-9]\+' <<< "${least_u_row}" \
           | grep -o '[0-9]\+')
-        if [ "$(try_assign_prp ${least_u_id} )" ]; then
+        try_assign_prp ${least_u_id}
+        if [ $? -eq 0 ]; then
           echo "Assigned PRP check: ${least_u_id}"
         else
           echo "Smallest-unknown id ${least_u_id} is already scraped"
