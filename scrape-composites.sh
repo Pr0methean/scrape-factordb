@@ -35,6 +35,7 @@ let "hour_ns = 60 * ${minute_ns}"
           let "start = (($job * 809) % 1641) * 64"
         else
           let "start = 0"
+          let "stimulate = 5000"
         fi
         if [ ${start} -ge 100000 ]; then
             let "start = 100000"
