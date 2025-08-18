@@ -1,4 +1,4 @@
-name: Rust
+name: Scrape Composites
 
 on:
   push:
@@ -15,4 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: ./scrape-composites-server-side.sh
+    - run: timeout 330m ./scrape-composites-server-side.sh
+  client-side:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: echo 3 > /tmp/scrape-composites-large-threads
+    - run: timeout 330m ./scrape-composites.sh
