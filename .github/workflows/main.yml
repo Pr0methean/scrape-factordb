@@ -23,4 +23,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - run: sudo apt-get install libecm1
     - run: timeout 330m ./scrape-composites-large-ci.sh
