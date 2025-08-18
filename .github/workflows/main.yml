@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: timeout 330m source=${{ matrix.source }} ./scrape-composites-server-side.sh
+    - run: source=${{ matrix.source }} timeout 330m ./scrape-composites-server-side.sh
   client-side:
     runs-on: ubuntu-latest
     steps:
