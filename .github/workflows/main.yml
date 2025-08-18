@@ -1,0 +1,28 @@
+name: Scrape Composites
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: "0 0,6,12,18 * * *"
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  scrape-composites:
+    strategy:
+      matrix:
+        client-digits: [80,81,82,83,84,85,86,87,88,89]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: git lfs pull
+    - run: |
+           (
+             git lfs pull
+             source=C$((${{ matrix.client-digits }} + 10)).csv timeout 330m nice -+19 ./scrape-composites-server-side.sh
+           ) &
+           sudo apt-get install libecm1
+           digits=${{ matrix.client-digits }} timeout 330m ./scrape-composites-large-ci.sh
