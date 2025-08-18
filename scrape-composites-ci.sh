@@ -17,11 +17,13 @@ let "start = $SRANDOM % 105000"
         url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=${stimulate}&start=${start}&download=1"
         results=$(sem --id 'factordb-curl' --fg -j 2 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
         declare exact_size_results
-        if [ $digits -ge 89 ]; then
+        if [ $digits -ge 90 ]; then
           # Assume exact size, since there are so many numbers in these sizes
           echo "${id}: Fetched batch of ${stimulate} composites with ${digits} digits"
           exact_size_results="${results}"
         else
+          let "start = 0"
+          let "stimulate = 5000"
           exact_size_results=$(grep "^[0-9]\{${digits}\}\$" <<< "$results")
           result_count=$(wc -l <<< "$exact_size_results")
           if [ ${result_count} -eq 0 ]; then
