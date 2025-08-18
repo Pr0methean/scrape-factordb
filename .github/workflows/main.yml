@@ -20,5 +20,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: echo 3 > /tmp/scrape-composites-large-threads
-    - run: timeout 330m ./scrape-composites-large.sh
+    - run: timeout 330m ./scrape-composites-large-ci.sh
