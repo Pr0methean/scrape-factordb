@@ -15,4 +15,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: scrape-composites-server-side.sh
+    - run: ./scrape-composites-server-side.sh
