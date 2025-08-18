@@ -47,10 +47,6 @@ let "hour_ns = 60 * ${minute_ns}"
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
               start_time=$(date +%s%N)
-              if [ ${factors_so_far} -gt 0 -a ${start_time} -gt ${last_start} ]; then
-                echo "${id}: $(date -Is): Running time limit reached after ${factors_so_far} factors and ${composites_so_far} composites"
-                exit 0
-              fi
               echo "${id}: $(date -Is): ${factors_so_far} factors and ${composites_so_far} composites done so far. Factoring ${num} with msieve"
               declare factor
               let "composites_so_far += 1"
