@@ -1,1 +1,12 @@
 *.dat filter=lfs diff=lfs merge=lfs -text
+C91.csv filter=lfs diff=lfs merge=lfs -text
+C92.csv filter=lfs diff=lfs merge=lfs -text
+C93.csv filter=lfs diff=lfs merge=lfs -text
+C94.csv filter=lfs diff=lfs merge=lfs -text
+C97.csv filter=lfs diff=lfs merge=lfs -text
+C99.csv filter=lfs diff=lfs merge=lfs -text
+C100.csv filter=lfs diff=lfs merge=lfs -text
+C90.csv filter=lfs diff=lfs merge=lfs -text
+C95.csv filter=lfs diff=lfs merge=lfs -text
+C96.csv filter=lfs diff=lfs merge=lfs -text
+C98.csv filter=lfs diff=lfs merge=lfs -text
