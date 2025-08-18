@@ -9,7 +9,7 @@ while [ $job -ge "$max_job" ]; do # Select random point in the cycle, with no mo
 done
 let "id = 1"
 while [ ! -f "${fifo_id}" ]; do
-  echo "threads=1 job=${job} id=${id} nice=0 ./scrape-composites-ci.sh" >> "${fifo_id}"
+  echo "threads=1 digits=${digits} id=${id} nice=0 ./scrape-composites-ci.sh" >> "${fifo_id}"
   let "job++"
   let "id++"
 done &
