@@ -1,4 +1,4 @@
-name: Scrape Composites
+name: Scrape Composites (Client-Side)
 
 on:
   push:
@@ -11,15 +11,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  server-side:
-    strategy:
-      matrix:
-        source: ['C90.csv', 'C91.csv', 'C92.csv', 'C93.csv', 'C94.csv', 'C95.csv', 'C96.csv', 'C97.csv', 'C98.csv', 'C99.csv', 'C100.csv']
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - run: git lfs pull
-    - run: source=${{ matrix.source }} timeout 330m ./scrape-composites-server-side.sh
   client-side:
     strategy:
       matrix:
