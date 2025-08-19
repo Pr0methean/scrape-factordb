@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "master" ]
   schedule:
-    - cron: "0 0,6,12,18 * * *"
+    - cron: "0 0 */2 * *"
 env:
   CARGO_TERM_COLOR: always
 
@@ -15,6 +15,7 @@ jobs:
     strategy:
       matrix:
         client-digits: [80,81,82,83,84,85,86,87,88,89]
+        server-offset: [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
