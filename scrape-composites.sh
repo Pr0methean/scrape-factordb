@@ -27,7 +27,7 @@ let "hour_ns = 60 * ${minute_ns}"
             let "softmax_ns = ${min_softmax_ns}"
           fi
         else
-          let "digits = 100 - ($job % 23)" # Range of 78-100 digits during day
+          let "digits = 100 - ($job % 11)" # Range of 90-100 digits during day
           let "softmax_ns = (300 - ${digits} - ${digits}) * ${minute_ns}"
         fi
         let "last_start = $(date +%s%N) + $softmax_ns"
