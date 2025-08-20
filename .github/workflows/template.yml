@@ -18,8 +18,8 @@ jobs:
     - uses: actions/checkout@v4
     - run: |
            (
-             git lfs pull
-             source=C$((${{ matrix.client-digits }} + ${{ matrix.server-offset }})).csv timeout 330m nice -+19 ./scrape-composites-server-side.sh || true
+             git lfs pull -I C$((${{ matrix.client-digits }} + ${{ inputs.server-offset }})).csv
+             source=C$((${{ matrix.client-digits }} + ${{ inputs.server-offset }})).csv timeout 330m nice -+19 ./scrape-composites-server-side.sh || true
            ) &
            sudo apt-get install libecm1
            digits=${{ matrix.client-digits }} timeout 330m ./scrape-composites-large-ci.sh || true
