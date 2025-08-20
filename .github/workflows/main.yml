@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "master" ]
   schedule:
-    - cron: "0 0 * * 3,6"
+    - cron: "0 0 * * *"
 env:
   CARGO_TERM_COLOR: always
 concurrency:
@@ -17,14 +17,14 @@ jobs:
     strategy:
       matrix:
         server-offset: [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210]
-        client-digits: [80,81,82,83,84,85,86,87,88,89]
+        client-digits: [81,82,83,84,85,86,87,88,89,90]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - run: |
            (
              git lfs pull
-             source=C$((${{ matrix.client-digits }} + ${{ matrix.server-offset }})).csv timeout 330m nice -+19 ./scrape-composites-server-side.sh || true
+             source=C$((${{ matrix.client-digits }} + ${{ matrix.server-offset }})).csv timeout 2h nice -+19 ./scrape-composites-server-side.sh || true
            ) &
            sudo apt-get install libecm1
-           digits=${{ matrix.client-digits }} timeout 330m ./scrape-composites-large-ci.sh || true
+           digits=${{ matrix.client-digits }} timeout 2h ./scrape-composites-large-ci.sh || true
