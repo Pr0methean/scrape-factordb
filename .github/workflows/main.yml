@@ -1,4 +1,4 @@
-name: Scrape Composites
+ame: Scrape Composites
 
 on:
   push:
@@ -6,25 +6,31 @@ on:
   pull_request:
     branches: [ "master" ]
   schedule:
-    - cron: "0 0 * * *"
-env:
-  CARGO_TERM_COLOR: always
+    - cron: "0 0 * * 3,6"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 jobs:
-  composites:
+  small:
     strategy:
       matrix:
-        server-offset: [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210]
-        client-digits: [81,82,83,84,85,86,87,88,89,90]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - run: |
-           (
-             git lfs pull
-             source=C$((${{ matrix.client-digits }} + ${{ matrix.server-offset }})).csv timeout 2h nice -+19 ./scrape-composites-server-side.sh || true
-           ) &
-           sudo apt-get install libecm1
-           digits=${{ matrix.client-digits }} timeout 2h ./scrape-composites-large-ci.sh || true
+        server-offset: [10,20,30,40,50,60,70]
+    uses: ./.github/workflows/template.yml
+    with:
+      server-offset: ${{ matrix.server-offset }}
+  medium:
+    needs: small
+    strategy:
+      matrix:
+        server-offset: [80,90,100,110,120,130,140]
+    uses: ./.github/workflows/template.yml
+    with:
+      server-offset: ${{ matrix.server-offset }}
+  large:
+    needs: medium
+    strategy:
+      matrix:
+        server-offset: [150,160,170,180,190,200,210]
+    uses: ./.github/workflows/template.yml
+    with:
+      server-offset: ${{ matrix.server-offset }}
