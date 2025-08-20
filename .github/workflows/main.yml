@@ -1,4 +1,4 @@
-ame: Scrape Composites
+name: Scrape Composites
 
 on:
   push:
