@@ -14,5 +14,6 @@ b=65.0
 FIT_LIMIT=1e-16 
 fit f(x) 'stats.csv' using 1:(100. * ($3 + $5 + $6)/($2 + $3 + $4 + $5 + $6)) via a, b
 set xrange noextend
+set yrange [8:8.9]
 plot 'stats.csv' using 1:(100. * ($3 + $5 + $6)/($2 + $3 + $4 + $5 + $6)) title "% unfinished entries", f(x) title "Trendline"
 pause -1
