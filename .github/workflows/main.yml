@@ -13,7 +13,7 @@ concurrency:
 jobs:
   large:
     strategy:
-      max-parallel: 16
+      max-parallel: 18
       matrix:
         client-digits: [81,85,89,93,97,82,86,90,94,98,83,87,91,95,99,84,88,92,96,100]
         server-offset: [20,60,100,140,180,40,80,120,160,200]
@@ -23,7 +23,7 @@ jobs:
       server-offset: ${{ matrix.server-offset }}
   small:
     strategy:
-      max-parallel: 3
+      max-parallel: 1
       matrix:
         client-digits: [80,81,82,83,84,85,86,87,88,89,90]
     uses: ./.github/workflows/template.yml
