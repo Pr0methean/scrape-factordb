@@ -25,6 +25,7 @@ jobs:
            if [ ${server_digits} -lt 90 ]; then
              export server_digits=90
            fi
+           csv='C${server_digits}.csv'
            (
              git lfs pull -I "${csv}" || (
                wget "http://5.199.134.142/composite/${csv}.zst"
