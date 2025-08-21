@@ -21,9 +21,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: |
-           export csv=C$((${{ inputs.client-digits }} + ${{ inputs.server-offset }})).csv
+           export server-digits=$((${{ inputs.client-digits }} + ${{ inputs.server-offset }}))
+           if [ ${server-digits} -lt 90 ]; then
+             export server-digits=90
+           fi
            (
-             git lfs pull -I $csv || (
+             git lfs pull -I "${csv}" || (
                wget "http://5.199.134.142/composite/${csv}.zst"
                unzstd -f "${csv}.zst"
              )
