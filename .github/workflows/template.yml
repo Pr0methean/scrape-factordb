@@ -21,9 +21,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: |
-           export server-digits=$((${{ inputs.client-digits }} + ${{ inputs.server-offset }}))
-           if [ ${server-digits} -lt 90 ]; then
-             export server-digits=90
+           export server_digits=$((${{ inputs.client-digits }} + ${{ inputs.server-offset }}))
+           if [ ${server_digits} -lt 90 ]; then
+             export server_digits=90
            fi
            (
              git lfs pull -I "${csv}" || (
