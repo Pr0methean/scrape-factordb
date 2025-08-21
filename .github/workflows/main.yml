@@ -69,6 +69,7 @@ jobs:
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
+      server-offset: ${{ matrix.server-offset }}
   wave_7_80_90:
     needs: wave_6
     uses: ./.github/workflows/template.yml
