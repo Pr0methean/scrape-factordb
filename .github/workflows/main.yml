@@ -14,8 +14,8 @@ jobs:
   wave_1:
     strategy:
       matrix:
-        client-digits: [81,83,85,87,89]
-        server-offset: [10,40,70,100,130,160,190]
+        client-digits: [81,83,85,87,89,91,93,95,97,99]
+        server-offset: [20,60,100,140,180]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
@@ -24,8 +24,8 @@ jobs:
     needs: wave_1
     strategy:
       matrix:
-        client-digits: [82,84,86,88,90]
-        server-offset: [10,40,70,100,130,160,190]
+        client-digits: [82,84,86,88,90,92,94,96,98,100]
+        server-offset: [20,60,100,140,180]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
@@ -34,8 +34,8 @@ jobs:
     needs: wave_2
     strategy:
       matrix:
-        client-digits: [81,83,85,87,89]
-        server-offset: [20,50,80,110,140,170,200]
+        client-digits: [81,83,85,87,89,91,93,95,97,99]
+        server-offset: [0,80,160]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
@@ -44,8 +44,8 @@ jobs:
     needs: wave_3
     strategy:
       matrix:
-        client-digits: [82,84,86,88,90]
-        server-offset: [20,50,80,110,140,170,200]
+        client-digits: [82,84,86,88,90,92,94,96,98,100]
+        server-offset: [40,120,200]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
@@ -54,8 +54,8 @@ jobs:
     needs: wave_4
     strategy:
       matrix:
-        client-digits: [81,83,85,87,89]
-        server-offset: [30,60,90,120,150,180,210]
+        client-digits: [81,83,85,87,89,91,93,95,97,99]
+        server-offset: [40,120,200]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
@@ -64,34 +64,10 @@ jobs:
     needs: wave_5
     strategy:
       matrix:
-        client-digits: [82,84,86,88,90]
-        server-offset: [30,60,90,120,150,180,210]
+        client-digits: [82,84,86,88,90,92,94,96,98,100]
+        server-offset: [0,80,160]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
-      server-offset: ${{ matrix.server-offset }}
-  wave_7_80_90:
-    needs: wave_6
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: 80
-      server-offset: 10
-  wave_7_90:
-    strategy:
-      matrix:
-        server-offset: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
-    needs: wave_6
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: 90
-      server-offset: 0
-  wave_7_91:
-    strategy:
-      matrix:
-        server-offset: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
-    needs: wave_6
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: 91
       server-offset: ${{ matrix.server-offset }}
 
