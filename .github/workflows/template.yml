@@ -13,6 +13,9 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
   composites:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.client-digits }}-${{ inputs.server-offset }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     if: always()
     steps:
