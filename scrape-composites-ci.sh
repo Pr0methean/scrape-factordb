@@ -29,9 +29,9 @@ let "start = $SRANDOM % 105000"
           let "stimulate = 5000"
           exact_size_results=$(grep "^[0-9]\{${digits}\}\$" <<< "$results")
           result_count=$(wc -l <<< "$exact_size_results")
-          if [ ${result_count} -eq 0 ]; then
-            exact_size_results=$(shuf -n 1 <<< ${results})
-            echo "${id}: No results with exactly ${digits} digits, so factoring one larger composite instead"
+          if [ ${result_count} -le 1 ]; then
+            exact_size_results=$(shuf -n 64 <<< ${results})
+            echo "${id}: No results with exactly ${digits} digits, so factoring larger composites instead"
           else
             echo "${id}: Fetched batch of ${result_count} composites with ${digits} digits"
           fi
