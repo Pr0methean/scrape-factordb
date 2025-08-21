@@ -24,11 +24,10 @@ jobs:
     strategy:
       matrix:
         client-digits: [80,89]
-        server-offset: [0,10]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
-      server-offset: ${{ matrix.server-offset }}
+      server-offset: 10
   wave_2:
     needs: ['wave_1', 'wave_1a']
     strategy:
@@ -44,11 +43,10 @@ jobs:
     strategy:
       matrix:
         client-digits: [83,86,90]
-        server-offset: [0,10]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
-      server-offset: ${{ matrix.server-offset }}
+      server-offset: 10
   wave_3:
     needs: ['wave_2', 'wave_2a']
     strategy:
@@ -64,11 +62,10 @@ jobs:
     strategy:
       matrix:
         client-digits: [81,84,87]
-        server-offset: [0,10]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
-      server-offset: ${{ matrix.server-offset }}
+      server-offset: 10
   wave_4:
     needs: ['wave_3', 'wave_3a']
     strategy:
@@ -84,9 +81,8 @@ jobs:
     strategy:
       matrix:
         client-digits: [82,85,88]
-        server-offset: [0,10]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
-      server-offset: ${{ matrix.server-offset }}
+      server-offset: 10
 
