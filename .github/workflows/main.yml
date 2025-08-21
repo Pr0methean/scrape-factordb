@@ -42,7 +42,7 @@ jobs:
     needs: ['wave_1', 'wave_1a']
     strategy:
       matrix:
-        client-digits: [83,86]
+        client-digits: [83,86,90]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
