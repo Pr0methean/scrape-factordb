@@ -13,6 +13,8 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
   composites:
+    strategy:
+      fail-fast: false
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.client-digits }}-${{ inputs.server-offset }}
       cancel-in-progress: false
