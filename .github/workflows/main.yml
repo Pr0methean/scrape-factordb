@@ -17,9 +17,29 @@ jobs:
       matrix:
         client-digits: [81,85,89,93,97,82,86,90,94,98,83,87,91,95,99,84,88,92,96,100]
         server-offset: [20,60,100,140,180,40,80,120,160,200]
-        include:
+        include: # GITHUB FIXME: Let us use either multiple matrices, or lists in `include`
           - server-offset: 10
-            client-digits: [80,81,82,83,84,85,86,87,88,89,90]
+            client-digits: 80
+          - server-offset: 10
+            client-digits: 82
+          - server-offset: 10
+            client-digits: 84
+          - server-offset: 10
+            client-digits: 86
+          - server-offset: 10
+            client-digits: 88
+          - server-offset: 10
+            client-digits: 90
+          - server-offset: 10
+            client-digits: 81
+          - server-offset: 10
+            client-digits: 83
+          - server-offset: 10
+            client-digits: 85
+          - server-offset: 10
+            client-digits: 87
+          - server-offset: 10
+            client-digits: 89
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
