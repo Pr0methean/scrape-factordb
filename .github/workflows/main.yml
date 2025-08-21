@@ -11,76 +11,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 jobs:
-  wave_1:
+  large:
     strategy:
+      max-parallel: 16
       matrix:
-        client-digits: [81,83,85,87,89,91,93,95,97,99]
-        server-offset: [20,60,100,140,180]
+        client-digits: [81,85,89,93,97,82,86,90,94,98,83,87,91,95,99,84,88,92,96,100]
+        server-offset: [20,60,100,140,180,40,80,120,160,200]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
       server-offset: ${{ matrix.server-offset }}
-  wave_1a:
+  small:
     strategy:
+      max-parallel: 3
       matrix:
-        client-digits: [80,89]
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: ${{ matrix.client-digits }}
-      server-offset: 10
-  wave_2:
-    needs: ['wave_1']
-    strategy:
-      matrix:
-        client-digits: [82,84,86,88,90,92,94,96,98,100]
-        server-offset: [20,60,100,140,180]
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: ${{ matrix.client-digits }}
-      server-offset: ${{ matrix.server-offset }}
-  wave_2a:
-    needs: ['wave_1a']
-    strategy:
-      matrix:
-        client-digits: [83,86,90]
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: ${{ matrix.client-digits }}
-      server-offset: 10
-  wave_3:
-    needs: ['wave_2']
-    strategy:
-      matrix:
-        client-digits: [81,83,85,87,89,91,93,95,97,99]
-        server-offset: [40,80,120,160,200]
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: ${{ matrix.client-digits }}
-      server-offset: ${{ matrix.server-offset }}
-  wave_3a:
-    needs: ['wave_2a']
-    strategy:
-      matrix:
-        client-digits: [81,84,87]
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: ${{ matrix.client-digits }}
-      server-offset: 10
-  wave_4:
-    needs: ['wave_3']
-    strategy:
-      matrix:
-        client-digits: [82,84,86,88,90,92,94,96,98,100]
-        server-offset: [40,80,120,160,200]
-    uses: ./.github/workflows/template.yml
-    with:
-      client-digits: ${{ matrix.client-digits }}
-      server-offset: ${{ matrix.server-offset }}
-  wave_4a:
-    needs: ['wave_3a']
-    strategy:
-      matrix:
-        client-digits: [82,85,88]
+        client-digits: [80,81,82,83,84,85,86,87,88,89,90]
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
