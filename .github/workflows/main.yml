@@ -13,8 +13,8 @@ concurrency:
 jobs:
   composites:
     strategy:
+      max-parallel: 19
       matrix:
-        max-parallel: 19
         client-digits: [81,85,89,93,97,82,86,90,94,98,83,87,91,95,99,84,88,92,96,100]
         server-offset: [20,60,100,140,180,40,80,120,160,200]
         include:
