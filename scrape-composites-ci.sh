@@ -8,8 +8,11 @@ let "start = $SRANDOM % 105000"
         # request the next power of 2 up from the maximum number we can possibly process
         let "stimulate = 64"
         results=
-        if [ ${start} -ge 100000 ]; then
-            let "start = 100000"
+        if [ ${digits} -le 89 ]; then
+          let "start = 0"
+          let "stimulate = 5000"
+        elif [ ${start} -ge 100000 ]; then
+          let "start = 100000"
           let "stimulate = 5000"
         fi
         # Don't choose ones ending in 0,2,4,5,6,8, because those are still being trial-factored which may
