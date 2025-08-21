@@ -14,7 +14,7 @@ jobs:
   wave_1:
     strategy:
       matrix:
-        client-digits: [81,82,83,84,85]
+        client-digits: [81,83,85,87,89]
         server-offset: [10,40,70,100,130,160,190]
     uses: ./.github/workflows/template.yml
     with:
@@ -24,7 +24,7 @@ jobs:
     needs: wave_1
     strategy:
       matrix:
-        client-digits: [86,87,88,89,90]
+        client-digits: [82,84,86,88,90]
         server-offset: [10,40,70,100,130,160,190]
     uses: ./.github/workflows/template.yml
     with:
@@ -34,7 +34,7 @@ jobs:
     needs: wave_2
     strategy:
       matrix:
-        client-digits: [81,82,83,84,85]
+        client-digits: [81,83,85,87,89]
         server-offset: [20,50,80,110,140,170,200]
     uses: ./.github/workflows/template.yml
     with:
@@ -44,7 +44,7 @@ jobs:
     needs: wave_3
     strategy:
       matrix:
-        client-digits: [86,87,88,89,90]
+        client-digits: [82,84,86,88,90]
         server-offset: [20,50,80,110,140,170,200]
     uses: ./.github/workflows/template.yml
     with:
@@ -54,7 +54,7 @@ jobs:
     needs: wave_4
     strategy:
       matrix:
-        client-digits: [81,82,83,84,85]
+        client-digits: [81,83,85,87,89]
         server-offset: [30,60,90,120,150,180,210]
     uses: ./.github/workflows/template.yml
     with:
@@ -64,7 +64,7 @@ jobs:
     needs: wave_5
     strategy:
       matrix:
-        client-digits: [86,87,88,89,90]
+        client-digits: [82,84,86,88,90]
         server-offset: [30,60,90,120,150,180,210]
     uses: ./.github/workflows/template.yml
     with:
