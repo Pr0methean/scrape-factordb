@@ -18,6 +18,7 @@ jobs:
       cancel-in-progress: false
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
+    continue-on-error: true
     steps:
     - uses: actions/checkout@v4
     - run: |
