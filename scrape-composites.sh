@@ -46,19 +46,13 @@ let "hour_ns = 60 * ${minute_ns}"
         url="https://factordb.com/listtype.php?t=3&mindig=${digits}&perpage=${stimulate}&start=${start}&download=1"
         results=$(sem --id 'factordb-curl' --fg -j 2 xargs wget -e robots=off -nv --no-check-certificate --retry-connrefused --retry-on-http-error=502 -O- <<< "$url")
         declare exact_size_results
-        if [ $digits -ge 89 ]; then
-          # Assume exact size, since there are so many numbers in these sizes
-          echo "${id}: Fetched batch of ${stimulate} composites with ${digits} digits"
-          exact_size_results="${results}"
+        exact_size_results=$(grep "^[0-9]\{${digits}\}\$" <<< "$results")
+        result_count=$(wc -l <<< "$exact_size_results")
+        if [ ${result_count} -eq 0 ]; then
+          exact_size_results=$(shuf -n 1 <<< ${results})
+          echo "${id}: No results with exactly ${digits} digits, so factoring one larger composite instead"
         else
-          exact_size_results=$(grep "^[0-9]\{${digits}\}\$" <<< "$results")
-          result_count=$(wc -l <<< "$exact_size_results")
-          if [ ${result_count} -eq 0 ]; then
-            exact_size_results=$(shuf -n 1 <<< ${results})
-            echo "${id}: No results with exactly ${digits} digits, so factoring one larger composite instead"
-          else
-            echo "${id}: Fetched batch of ${result_count} composites with ${digits} digits"
-          fi
+          echo "${id}: Fetched batch of ${result_count} composites with ${digits} digits"
         fi
         touch "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
         echo "${id}: To cancel this batch: rm /tmp/delete_to_cancel_scrape_composites_batch_${id}"
