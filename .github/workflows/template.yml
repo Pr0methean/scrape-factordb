@@ -6,20 +6,20 @@ on:
       server-offset:
         required: true
         type: number
+      client-digits:
+        required: true
+        type: number
 env:
   CARGO_TERM_COLOR: always
 jobs:
   composites:
-    strategy:
-      matrix:
-        client-digits: [81,82,83,84,85,86,87,88,89,90]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - run: |
            (
-             git lfs pull -I C$((${{ matrix.client-digits }} + ${{ inputs.server-offset }})).csv
-             source=C$((${{ matrix.client-digits }} + ${{ inputs.server-offset }})).csv timeout 330m nice -+19 ./scrape-composites-server-side.sh || true
+             git lfs pull -I C$((${{ inputs.client-digits }} + ${{ inputs.server-offset }})).csv
+             source=C$((${{ inputs.client-digits }} + ${{ inputs.server-offset }})).csv timeout 330m nice -+19 ./scrape-composites-server-side.sh || true
            ) &
            sudo apt-get install libecm1
-           digits=${{ matrix.client-digits }} timeout 330m ./scrape-composites-large-ci.sh || true
+           digits=${{ inputs.client-digits }} timeout 330m ./scrape-composites-large-ci.sh || true
