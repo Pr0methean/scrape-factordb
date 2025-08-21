@@ -22,7 +22,7 @@ jobs:
            (
              git lfs pull -I $csv || (
                wget "http://5.199.134.142/composite/${csv}.zst"
-               unzstd "${csv}.zst"
+               unzstd -f "${csv}.zst"
              )
              source=${csv} timeout 330m nice -+19 ./scrape-composites-server-side.sh || true
            ) &
