@@ -42,8 +42,11 @@ jobs:
              digits=${{ inputs.client-digits }} ./scrape-composites-large-ci.sh
            ) &
            client=$!
-           sleep 19800
-           killall -HUP parallel
-           rm /tmp/delete_*
-           pkill msieve
+           (
+             sleep 19800
+             killall -HUP parallel
+             rm /tmp/delete_*
+             sleep 1200
+             pkill msieve
+           ) &
            wait $client
