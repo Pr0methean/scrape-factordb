@@ -31,10 +31,12 @@ jobs:
            fi
            csv="C${server_digits}.csv"
            (
+             echo "Fetching file C${server_digits}.csv"
              git lfs pull -I "${csv}" || (
                wget "http://5.199.134.142/composite/${csv}.zst"
                unzstd -f "${csv}.zst"
              )
+             echo "Handling file C${server_digits}.csv"
              source=${csv} nice -+19 ./scrape-composites-server-side.sh
            ) &
            (
