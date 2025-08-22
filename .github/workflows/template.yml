@@ -29,13 +29,12 @@ jobs:
            if [ ${server_digits} -lt 90 ]; then
              export server_digits=90
            fi
-           csv="C${server_digits}.csv"
            (
-             git lfs pull -I "${csv}" || (
-               wget "http://5.199.134.142/composite/${csv}.zst"
-               unzstd -f "${csv}.zst"
-             )
-             source=${csv} nice -+19 ./scrape-composites-server-side.sh
+             let "start = $SRANDOM % 100001"
+             curl -Ss --retry 10 --retry-all-errors "https://factordb.com/listtype.php?t=3&mindig=90&perpage=5000&start=${start}" \
+                 | grep -o "index\.php\?id=[0-9]\+" \
+                 | grep -o "[0-9]\+" \
+                 | nice -+19 ./scrape-composites-server-side.sh
            ) &
            (
              sudo apt-get install libecm1

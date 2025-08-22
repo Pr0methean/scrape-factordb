@@ -1,7 +1,9 @@
 #!/bin/bash
-while IFS=, read -r id value; do
-  echo -n "${id} (${value}): "
-  curl -S --retry 10 --retry-all-errors "https://factordb.com/sequences.php?check=${id}&fr=0&to=100&action=last20&aq=${value}" \
-    | grep "${id}" \
-    | grep -o '<input type="submit"[^>]*>'
-done < <(shuf < "${source}")
+while IFS=, read -r id; do
+  curl -Ss --retry 10 --retry-all-errors "https://factordb.com/sequences.php?check=${id}"
+  if [ $? -eq 0 ]; then
+    echo "Checked ID ${id}"
+  else
+    echo "ERROR: Got exit status $? checking ID ${id}"
+  fi
+done
