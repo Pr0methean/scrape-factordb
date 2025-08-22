@@ -39,7 +39,7 @@ jobs:
            ) &
            (
              sudo apt-get install libecm1
-             digits=${{ inputs.client-digits }} timeout 330m ./scrape-composites-large-ci.sh
+             digits=${{ inputs.client-digits }} ./scrape-composites-large-ci.sh
            ) &
            client=$!
            sleep 19800
