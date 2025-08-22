@@ -12,7 +12,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
 jobs:
-  composites:
+  C:
     strategy:
       fail-fast: false
     concurrency:
