@@ -45,6 +45,7 @@ let "start = $SRANDOM % 105000"
               echo "${id}: $(date -Is): ${factors_so_far} factors and ${composites_so_far} composites done so far. Factoring ${num} with msieve"
               declare factor
               let "composites_so_far += 1"
+              touch "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
               while read -r factor; do
                 let "factors_so_far += 1"
                 now="$(date -Is)"
@@ -63,6 +64,10 @@ let "start = $SRANDOM % 105000"
                     echo "${id}: Submitting factor ${factor}: $output"
                     echo "${id}: Factor ${factor} of ${num} accepted."
                   fi
+                fi
+                if [ ! -f "/tmp/delete_to_cancel_scrape_composites_batch_${id}" ]; then
+                  echo "${id}: $(date -Is): Aborting because /tmp/delete_to_cancel_scrape_composites_batch_${id} was deleted"
+                  exit 0
                 fi
               done < <(./msieve -e -q -s "/tmp/msieve_${num}.dat" -t "${threads}" "${num}" | grep -o ':[0-9 ]\+' | grep -o '[0-9]\+' | head -n -1 | uniq)
               end_time=$(date +%s%N)

@@ -23,7 +23,8 @@ jobs:
     continue-on-error: true
     steps:
     - uses: actions/checkout@v4
-    - run: |
+    - name: Factorize
+      run: |
            export server_digits=$((${{ inputs.client-digits }} + ${{ inputs.server-offset }}))
            if [ ${server_digits} -lt 90 ]; then
              export server_digits=90
@@ -34,7 +35,15 @@ jobs:
                wget "http://5.199.134.142/composite/${csv}.zst"
                unzstd -f "${csv}.zst"
              )
-             source=${csv} timeout 330m nice -+19 ./scrape-composites-server-side.sh || true
+             source=${csv} nice -+19 ./scrape-composites-server-side.sh
            ) &
-           sudo apt-get install libecm1
-           digits=${{ inputs.client-digits }} timeout 330m ./scrape-composites-large-ci.sh || true
+           (
+             sudo apt-get install libecm1
+             digits=${{ inputs.client-digits }} timeout 330m ./scrape-composites-large-ci.sh
+           ) &
+           client=$!
+           sleep 19800
+           killall -HUP parallel
+           rm /tmp/delete_*
+           pkill msieve
+           wait $client
