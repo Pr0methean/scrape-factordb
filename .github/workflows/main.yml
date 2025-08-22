@@ -15,31 +15,31 @@ jobs:
     strategy:
       max-parallel: 19
       matrix:
-        client-digits: [81,85,89,93,97,82,86,90,94,98,83,87,91,95,99,84,88,92,96,100]
-        server-offset: [20,60,100,140,180,40,80,120,160,200]
+        client-digits: [90,91,85,96,82,93,87,98,81,92,89,100,83,94,84,95,86,97,88,99]
+        server-offset: [120,100,160,60,180,80,140,40,200,20]
         include: # GITHUB FIXME: Let us use either multiple matrices, or lists in `include`
-          - server-offset: 10
-            client-digits: 80
-          - server-offset: 10
-            client-digits: 82
-          - server-offset: 10
-            client-digits: 84
-          - server-offset: 10
-            client-digits: 86
-          - server-offset: 10
-            client-digits: 88
-          - server-offset: 10
-            client-digits: 90
-          - server-offset: 10
-            client-digits: 81
-          - server-offset: 10
-            client-digits: 83
           - server-offset: 10
             client-digits: 85
           - server-offset: 10
-            client-digits: 87
+            client-digits: 82
+          - server-offset: 10
+            client-digits: 88
+          - server-offset: 10
+            client-digits: 81
+          - server-offset: 10
+            client-digits: 86
+          - server-offset: 10
+            client-digits: 84
           - server-offset: 10
             client-digits: 89
+          - server-offset: 10
+            client-digits: 80
+          - server-offset: 10
+            client-digits: 90
+          - server-offset: 10
+            client-digits: 83
+          - server-offset: 10
+            client-digits: 87
     uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
