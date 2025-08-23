@@ -30,18 +30,20 @@ jobs:
              export server_digits=90
            fi
            (
+             csv="C${server_digits}.csv"
+             echo "Fetching file C${server_digits}.csv"
+             nice -+19 git lfs pull -I "${csv}" || (
+               nice -+19 wget "http://5.199.134.142/composite/${csv}.zst"
+               nice -+19 unzstd -f "${csv}.zst"
+             )
+           ) &
+           (
              let "start = $(($SRANDOM % 100001))"
              curl -Ss --retry 10 --retry-all-errors "https://factordb.com/listtype.php?t=3&mindig=${server-digits}&perpage=5000&start=${start}" \
                  | grep -o "id=[0-9]\+" \
                  | uniq \
                  | grep -o "[0-9]\+" \
                  | nice -+19 ./scrape-composites-server-side.sh
-             csv="C${server_digits}.csv"
-             echo "Fetching file C${server_digits}.csv"
-             git lfs pull -I "${csv}" || (
-               wget "http://5.199.134.142/composite/${csv}.zst"
-               unzstd -f "${csv}.zst"
-             )
              echo "Handling file C${server_digits}.csv"
              source=${csv} nice -+19 ./scrape-composites-server-side-from-dump.sh
            ) &
