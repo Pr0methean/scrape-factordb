@@ -5,7 +5,7 @@ on:
     inputs:
       server-offset:
         required: true
-0        type: number
+        type: number
       client-digits:
         required: true
         type: number
