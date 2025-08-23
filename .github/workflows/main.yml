@@ -38,7 +38,7 @@ jobs:
           - server-offset: 10
             client-digits: 87
     concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ matrix.client-digits}}-${{ matrix.server-offset }}
+      group: ${{ github.event.pull_request.number || github.ref }}-${{ matrix.client-digits}}-${{ matrix.server-offset }}
       cancel-in-progress: false
     uses: ./.github/workflows/combined-template.yml
     with:
