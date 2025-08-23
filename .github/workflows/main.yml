@@ -2,9 +2,9 @@ name: Scrape Composites
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "*" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "*" ]
   schedule:
     - cron: "0 0 1,4,7,9,12,15,18,20,23,26,28 * *"
 concurrency:
