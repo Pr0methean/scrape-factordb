@@ -1,6 +1,6 @@
 #!/bin/bash
 set -u
-fifo_id="/tmp/$(uuidgen)"
+fifo_id="/tmp/scrape-composites-fifo"
 mkfifo "${fifo_id}"
 let "job = 9999999999"
 let "max_job = 1641 * 23 * 11 * 10345"

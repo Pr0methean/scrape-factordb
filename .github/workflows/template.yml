@@ -46,6 +46,7 @@ jobs:
              sleep 19800
              killall -HUP parallel
              rm /tmp/delete_*
+             rm /tmp/scrape-composites-fifo
              sleep 1200
              pkill msieve
            ) &
