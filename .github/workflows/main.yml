@@ -13,7 +13,7 @@ concurrency:
 jobs:
   C:
     strategy:
-      max-parallel: 18
+      max-parallel: 19
       matrix:
         client-digits: [90,91,85,96,82,93,87,98,81,92,89,100,83,94,84,95,86,97,88,99]
         server-offset: [120,100,160,60,180,80,140,40,200,20]
