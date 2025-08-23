@@ -40,7 +40,7 @@ jobs:
             client-digits: 83
           - server-offset: 10
             client-digits: 87
-    uses: ./.github/workflows/template.yml
+    uses: ./.github/workflows/combined-template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
       server-offset: ${{ matrix.server-offset }}
