@@ -62,3 +62,8 @@ jobs:
              pkill curl
            ) &
            wait $client
+  - uses: actions/upload-artifact@v4
+    with:
+      name: Failed Submissions
+      path: failed-submissions.csv
+      if-no-files-found: ignore
