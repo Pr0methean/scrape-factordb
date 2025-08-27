@@ -25,6 +25,11 @@ jobs:
     - uses: actions/checkout@v4
     - name: Factorize
       run: |
+           (
+             sudo apt-get install libecm1
+             digits=${{ inputs.client-digits }} ./scrape-composites-large-ci.sh
+           ) &
+           client=$!
            export server_digits=$((${{ inputs.client-digits }} + ${{ inputs.server-offset }}))
            if [ ${server_digits} -lt 90 ]; then
              export server_digits=90
@@ -51,11 +56,6 @@ jobs:
              echo "Handling file C${server_digits}.csv"
              source=${csv} nice -+19 ./scrape-composites-server-side-from-dump.sh
            ) &
-           (
-             sudo apt-get install libecm1
-             digits=${{ inputs.client-digits }} ./scrape-composites-large-ci.sh
-           ) &
-           client=$!
            (
              sleep 19800
              killall -HUP parallel
