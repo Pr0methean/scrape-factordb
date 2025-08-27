@@ -49,7 +49,7 @@ jobs:
     concurrency:
       group: ${{ github.event.pull_request.number || github.ref }}-${{ matrix.client-digits}}-${{ matrix.server-offset }}
       cancel-in-progress: false
-    uses: ./.github/workflows/combined-template.yml
+    uses: ./.github/workflows/template.yml
     with:
       client-digits: ${{ matrix.client-digits }}
       server-offset: ${{ matrix.server-offset }}

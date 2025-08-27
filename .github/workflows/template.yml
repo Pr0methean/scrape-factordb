@@ -35,14 +35,6 @@ jobs:
              export server_digits=90
            fi
            (
-             csv="C${server_digits}.csv"
-             echo "Fetching file C${server_digits}.csv"
-             nice -+19 git lfs pull -I "${csv}" || (
-               nice -+19 wget "http://5.199.134.142/composite/${csv}.zst"
-               nice -+19 unzstd -f "${csv}.zst"
-             )
-           ) &
-           (
              if [ ${{ inputs.client-digits }} -ge 90 ]; then
                let "start = $(($SRANDOM % 100001))"
              else
@@ -53,8 +45,6 @@ jobs:
                  | uniq \
                  | grep -o "[0-9]\+" \
                  | nice -+19 ./scrape-composites-server-side.sh
-             echo "Handling file C${server_digits}.csv"
-             source=${csv} nice -+19 ./scrape-composites-server-side-from-dump.sh
            ) &
            (
              sleep 19800
