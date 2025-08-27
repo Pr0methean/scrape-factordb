@@ -2,9 +2,17 @@ name: Scrape Composites
 
 on:
   push:
-    branches: [ "*" ]
+    paths:
+      - '.github/**'
+      - 'scrape-composites-ci.sh'
+      - 'scrape-composites-large-ci.sh'
+      - '*.csv'
   pull_request:
-    branches: [ "*" ]
+    paths:
+      - '.github/**'
+      - 'scrape-composites-ci.sh'
+      - 'scrape-composites-large-ci.sh'
+      - '*.csv'
   schedule:
     - cron: "0 0 1,4,7,9,12,15,18,20,23,26,28 * *"
   workflow_dispatch:
