@@ -35,17 +35,14 @@ jobs:
              export server_digits=90
            fi
            (
+             let "start = (${{ inputs.server-offset }} - 10) * 500"
              while true; do
-               if [ ${{ inputs.client-digits }} -ge 90 ]; then
-                 let "start = $(($SRANDOM % 100001))"
-               else
-                 let "start = 0"
-               fi
                curl -Ss --retry 10 --retry-all-errors "https://factordb.com/listtype.php?t=3&mindig=${server-digits}&perpage=5000&start=${start}" \
                    | grep -o "id=[0-9]\+" \
                    | uniq \
                    | grep -o "[0-9]\+" \
                    | nice -+19 ./scrape-composites-server-side.sh
+               let "start = (start + 5000) % 105000"
              done
            ) &
            (
