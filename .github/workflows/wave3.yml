@@ -14,7 +14,7 @@ on:
       - 'scrape-composites-large-ci.sh'
       - '*.csv'
   schedule:
-    - cron: "0 16 0,3,6,8,11,14,17,19,22,25,27 * *"
+    - cron: "0 16 3,6,8,11,14,17,19,22,25,27,30 * *"
   workflow_dispatch:
 concurrency:
   group: ${{ github.event.pull_request.number || github.ref }}-wave3
