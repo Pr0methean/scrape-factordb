@@ -1,5 +1,6 @@
 #!/bin/bash
 set -u
+touch "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
 mkdir -p "/tmp/factordb-composites"
 let "minute_ns = 60 * 1000 * 1000 * 1000"
 let "hour_ns = 60 * ${minute_ns}"
@@ -38,8 +39,11 @@ let "start = $SRANDOM % 105000"
         fi
         let "factors_so_far = 0"
         let "composites_so_far = 0"
-        touch "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
 	for num in $(shuf <<< ${exact_size_results}); do
+          if [ ! -f "/tmp/delete_to_cancel_scrape_composites_batch_${id}" ]; then
+            echo "${id}: $(date -Is): Aborting because /tmp/delete_to_cancel_scrape_composites_batch_${id} was deleted"
+            exit 0
+          fi
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
               start_time=$(date +%s%N)
@@ -64,10 +68,6 @@ let "start = $SRANDOM % 105000"
                     echo "${id}: Submitting factor ${factor}: $output"
                     echo "${id}: Factor ${factor} of ${num} accepted."
                   fi
-                fi
-                if [ ! -f "/tmp/delete_to_cancel_scrape_composites_batch_${id}" ]; then
-                  echo "${id}: $(date -Is): Aborting because /tmp/delete_to_cancel_scrape_composites_batch_${id} was deleted"
-                  exit 0
                 fi
               done < <(./msieve -e -q -s "/tmp/msieve_${num}.dat" -t "${threads}" "${num}" | grep -o ':[0-9 ]\+' | grep -o '[0-9]\+' | head -n -1 | uniq)
               end_time=$(date +%s%N)
