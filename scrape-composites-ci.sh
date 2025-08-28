@@ -38,6 +38,7 @@ let "start = $SRANDOM % 105000"
         fi
         let "factors_so_far = 0"
         let "composites_so_far = 0"
+        touch "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
 	for num in $(shuf <<< ${exact_size_results}); do
           exec 9>/tmp/factordb-composites/${num}
           if flock -xn 9; then
@@ -45,7 +46,6 @@ let "start = $SRANDOM % 105000"
               echo "${id}: $(date -Is): ${factors_so_far} factors and ${composites_so_far} composites done so far. Factoring ${num} with msieve"
               declare factor
               let "composites_so_far += 1"
-              touch "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
               while read -r factor; do
                 let "factors_so_far += 1"
                 now="$(date -Is)"
