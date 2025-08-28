@@ -1,4 +1,4 @@
-name: Scrape Composites
+name: Wave 6
 
 on:
   push:
@@ -16,13 +16,14 @@ on:
   schedule:
     - cron: "0 0 1,4,7,9,12,15,18,20,23,26,28 * *"
   workflow_dispatch:
+concurrency:
+  group: ${{ github.event.pull_request.number || github.ref }}-wave6
+  cancel-in-progress: false
 jobs:
   C:
     strategy:
       max-parallel: 19
       matrix:
-        client-digits: [90,91,85,96,82,93,87,98,81,92,89,100,83,94,84,95,86,97,88,99]
-        server-offset: [120,100,160,60,180,80,140,40,200,20]
         include: # GITHUB FIXME: Let us use either multiple matrices, or lists in `include`
           - server-offset: 10
             client-digits: 85

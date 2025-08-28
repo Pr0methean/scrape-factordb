@@ -1,0 +1,36 @@
+name: Wave 2
+
+on:
+  push:
+    paths:
+      - '.github/**'
+      - 'scrape-composites-ci.sh'
+      - 'scrape-composites-large-ci.sh'
+      - '*.csv'
+  pull_request:
+    paths:
+      - '.github/**'
+      - 'scrape-composites-ci.sh'
+      - 'scrape-composites-large-ci.sh'
+      - '*.csv'
+  schedule:
+    - cron: "0 0 1,4,7,9,12,15,18,20,23,26,28 * *"
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.event.pull_request.number || github.ref }}-wave2
+  cancel-in-progress: false
+jobs:
+  C:
+    strategy:
+      max-parallel: 19
+      matrix:
+        client-digits: [82,93,87,98]
+        server-offset: [120,100,160,60,180,80,140,40,200,20]
+    concurrency:
+      group: ${{ github.event.pull_request.number || github.ref }}-${{ matrix.client-digits}}-${{ matrix.server-offset }}
+      cancel-in-progress: false
+    uses: ./.github/workflows/template.yml
+    with:
+      client-digits: ${{ matrix.client-digits }}
+      server-offset: ${{ matrix.server-offset }}
+
