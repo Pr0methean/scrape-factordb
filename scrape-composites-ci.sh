@@ -61,9 +61,8 @@ let "hour_ns = 60 * ${minute_ns}"
                 fi
                 if [ $error -ne 0 ]; then
                   echo "${id}: Error submitting factor ${factor} of ${num}!"
-                  echo "\"${now}\",${num},${factor}" >> "failed-submissions.csv"
+                  echo "${num},${factor}" >> "failed-submissions.csv"
                 else
-                  echo "\"${now}\",${num},${factor}" >> "factor-submissions.csv"
                   grep -q "Already" <<< "$output"
                   if [ $? -eq 0 ]; then
                     echo "${id}: Factor ${factor} of ${num} already known! Aborting batch after ${factors_so_far} factors and ${composites_so_far} composites."
