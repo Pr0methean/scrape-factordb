@@ -54,7 +54,12 @@ let "hour_ns = 60 * ${minute_ns}"
                 now="$(date -Is)"
                 echo "${id}: ${now}: Found factor ${factor} of ${num}"
                 output=$(curl -X POST --retry 10 --retry-all-errors --retry-delay 10 http://factordb.com/reportfactor.php -d "number=${num}&factor=${factor}")
+                error=$?
+                grep -q "submitted" <<< "$output"
                 if [ $? -ne 0 ]; then
+                  error=1
+                fi
+                if [ $error -ne 0 ]; then
                   echo "${id}: Error submitting factor ${factor} of ${num}!"
                   echo "\"${now}\",${num},${factor}" >> "failed-submissions.csv"
                 else
