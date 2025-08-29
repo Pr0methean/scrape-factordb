@@ -4,7 +4,6 @@ touch "/tmp/delete_to_cancel_scrape_composites_batch_${id}"
 mkdir -p "/tmp/factordb-composites"
 let "minute_ns = 60 * 1000 * 1000 * 1000"
 let "hour_ns = 60 * ${minute_ns}"
-let "start = $SRANDOM % 105000"
         # Requesting lots of composites seems to trigger the server to factor the ones it's returning, so
         # request the next power of 2 up from the maximum number we can possibly process
         let "stimulate = 64"
