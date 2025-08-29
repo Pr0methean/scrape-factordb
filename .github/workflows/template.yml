@@ -50,8 +50,11 @@ jobs:
              killall -HUP parallel
              rm /tmp/delete_*
              rm /tmp/scrape-composites-fifo
+             have_msieve=$("pgrep msieve")
              sleep 1200
-             pkill msieve && sleep 30
+             if [ "${have_msieve}" != "" ]; then
+               pkill msieve && sleep 30
+             fi
              pkill curl
            ) &
            wait $client
