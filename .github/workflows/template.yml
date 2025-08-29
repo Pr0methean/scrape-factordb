@@ -51,7 +51,7 @@ jobs:
              rm /tmp/delete_*
              rm /tmp/scrape-composites-fifo
              sleep 1200
-             pkill msieve && sleep 5
+             pkill msieve && sleep 30
              pkill curl
            ) &
            wait $client
